@@ -1,5 +1,7 @@
 from decimal import Decimal
 from os import environ as env
+import shlex
+import subprocess
 import sys
 
 import piecash
@@ -115,4 +117,49 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
     except ValueError as ve:
         print('Failed to add the transaction with ValueError:')
         print(ve)
+        return False
+
+
+def get_gnucash_dir():
+    '''Get the fully qualified path of the directory of your .gnucash file'''
+    try:
+        gnucash_dir = env['GNUCASH_DIR']
+    except KeyError as ke:
+        print('Error, could not get GnuCash dir. from env var')
+        print('    Make sure to set $GNUCASH_DIR')
+        return None
+    else:
+        return gnucash_dir
+
+
+def run_shell_command(command_str):
+    '''Run a shell comand using subprocess.run. Return completed command obj'''
+    command = shlex.split(command_str)
+    run = subprocess.run(command, capture_output=True)
+
+    return run
+
+
+def git_pull(gnucash_dir):
+    '''Run a `git pull` command in the directory with the GnuCash book.'''
+    cmd = f'git -C {gnucash_dir} pull'
+    run = run_shell_command(cmd)
+
+    if run.returncode == 0:
+        print('successfully ran `git pull`')
+        return True
+    else:
+        return False
+
+
+def git_add(gnucash_dir):
+    '''Run `git add .` in the context of the GnuCash book directory.
+       `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
+    cmd = f'git -C {gnucash_dir} add .'
+    run = run_shell_command(cmd)
+
+    if run.returncode == 0:
+        print('Successfully ran `git add .` in GnuCash directory')
+        return True
+    else:
         return False

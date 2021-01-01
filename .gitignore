@@ -2,6 +2,8 @@
 *.LNK
 *.gnucash
 *.log
+*.swp
 Python/__pycache__/
 Python/*.gnucash
 Python/cleanup
+Python/*.swp
