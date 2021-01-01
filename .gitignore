@@ -1,0 +1,6 @@
+*.LCK
+*.LNK
+*.gnucash
+*.log
+Python/__pycache__/
+Python/*.gnucash
