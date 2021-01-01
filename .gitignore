@@ -4,3 +4,4 @@
 *.log
 Python/__pycache__/
 Python/*.gnucash
+Python/cleanup
