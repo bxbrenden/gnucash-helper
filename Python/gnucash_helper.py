@@ -13,7 +13,7 @@ def get_book_name_from_env():
         book_name = env['GNUCASH_BOOK_NAME']
     except KeyError as ke:
         print(f'Error: could not get GnuCash book name from env. var. {ke}.')
-        return None
+        sys.exit(1)
     else:
         return book_name
 
@@ -127,7 +127,7 @@ def get_gnucash_dir():
     except KeyError as ke:
         print('Error, could not get GnuCash dir. from env var')
         print('    Make sure to set $GNUCASH_DIR')
-        return None
+        sys.exit(1)
     else:
         return gnucash_dir
 
@@ -149,6 +149,9 @@ def git_pull(gnucash_dir):
         print('successfully ran `git pull`')
         return True
     else:
+        print('Error: failed to run a `git pull` command.\
+                See below for command output')
+        print(run)
         return False
 
 
@@ -162,4 +165,62 @@ def git_add(gnucash_dir):
         print('Successfully ran `git add .` in GnuCash directory')
         return True
     else:
+        print('Error: failed to run a `git add` command.\
+                  See below for command output')
+        print(run)
         return False
+
+
+def git_commit(gnucash_dir, message):
+    '''Run `git commit -m "{message}"` in the context of the GnuCash dir'''
+    cmd = f'git -C {gnucash_dir} commit -m "{message}"'
+    run = run_shell_command(cmd)
+
+    if run.returncode == 0:
+        print(f'Successfully ran the following git commit command:')
+        print(f'    {cmd}')
+        return True
+    else:
+        print('Error: failed to run a `git commit` command.\
+                  See below for command output')
+        print(run)
+        return False
+
+
+def git_push(gnucash_dir):
+    '''Run a `git push` command in the context of the GnuCash directory'''
+    cmd = f'git -C {gnucash_dir} push'
+    run = run_shell_command(cmd)
+
+    if run.returncode == 0:
+        print('Successfully ran `git push`')
+        return True
+    else:
+        print('Error: failed to run `git push`.\
+                See below for command output')
+        print(run)
+        return False
+
+
+def git_add_commit_and_push(gnucash_dir, commit_message):
+    '''Run `git add .`, `git commit -m "message"`, and `git push`,
+       all in the context of the directory that contains your GnuCash file.'''
+    added = git_add(gnucash_dir)
+    if added:
+        committed = git_commit(gnucash_dir, commit_message)
+        if committed:
+            pushed = git_push(gnucash_dir)
+            if pushed:
+                return (True, None)
+            else:
+                failure = 'Git add and commit succeeded, but pushing failed'
+                print(failure)
+                return (False, failure)
+        else:
+            failure = 'Git add succeeded, but commit failed. Did not try a push'
+            print(failure)
+            return (False, failure)
+    else:
+        failure = 'Git add failed'
+        print(failure)
+        return (False, failure)

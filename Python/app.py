@@ -2,7 +2,10 @@ from gnucash_helper import list_accounts,\
                            get_book_name_from_env,\
                            open_book,\
                            get_account,\
-                           add_transaction
+                           add_transaction,\
+                           get_gnucash_dir,\
+                           git_pull,\
+                           git_add_commit_and_push
 
 from decimal import Decimal, ROUND_HALF_UP
 from os import environ as env
@@ -21,7 +24,9 @@ from wtforms.validators import DataRequired
 
 class TransactionForm(FlaskForm):
     book_name = get_book_name_from_env()
-    gnucash_book = open_book(book_name, readonly=True)
+    gnucash_dir = get_gnucash_dir()
+    path_to_book = gnucash_dir + '/' + book_name
+    gnucash_book = open_book(path_to_book, readonly=True)
     accounts = [acc.fullname for acc in list_accounts(gnucash_book)]
     gnucash_book.close()
     debit = SelectField('Source Account (Debit)',
@@ -52,18 +57,31 @@ bootstrap = Bootstrap(app)
 def index():
     form = TransactionForm()
     if form.validate_on_submit():
+        # Add the transaction to the GnuCash book
         book_name = get_book_name_from_env()
-        gnucash_book = open_book(book_name)
+        gnucash_dir = get_gnucash_dir()
+        path_to_book = gnucash_dir + '/' + book_name
+        gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
         credit = form.credit.data
         debit = form.debit.data
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
-        if added_txn:
-            flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
+
+        # Run a git pull to ensure latest version of budget
+        #  If it works, try to add, commit, and push the changes.
+        #  Flash the results to the screen in the browser
+        pulled = git_pull(gnucash_dir)
+        if pulled:
+            git_result, git_output = git_add_commit_and_push(gnucash_dir, descrip)
+            if added_txn and git_result:
+                flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
+            else:
+                flash(f'Transaction failed with an error!', 'error')
+                flash(git_output, 'error')
         else:
-            flash(f'Transaction failed!', 'error')
+            print('Git pull failed, so all subsequent steps weren\'t attempted')
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
 
