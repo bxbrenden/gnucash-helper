@@ -42,7 +42,9 @@ class TransactionForm(FlaskForm):
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY', 'SuperSecretKey123$')
+app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
+                                   'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
+
 bootstrap = Bootstrap(app)
 
 
