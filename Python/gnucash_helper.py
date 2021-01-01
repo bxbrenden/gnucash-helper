@@ -133,6 +133,17 @@ def get_gnucash_dir():
         return gnucash_dir
 
 
+def get_git_user_name_and_email_from_env():
+    try:
+        git_user = env['GIT_USER']
+        git_email = env['GIT_EMAIL']
+    except KeyError as ke:
+        print('Error: failed to source {ke} from env var. Make sure to set it')
+        sys.exit(1)
+    else:
+        return (git_user, git_email)
+
+
 def get_github_token_and_url_from_env():
     try:
         gh_token = env['GITHUB_TOKEN']
