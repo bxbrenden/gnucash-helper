@@ -1,9 +1,19 @@
 from decimal import Decimal
+from os import environ as env
 import sys
 
 import piecash
 from piecash import Transaction, Split, GnucashException
 from piecash.core.factories import create_currency_from_ISO
+
+def get_book_name_from_env():
+    try:
+        book_name = env['GNUCASH_BOOK_NAME']
+    except KeyError as ke:
+        print(f'Error: could not get GnuCash book name from env. var. {ke}.')
+        return None
+    else:
+        return book_name
 
 
 def open_book(book_name, readonly=False):
@@ -81,12 +91,11 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
         if credit and debit:
             #usd = create_currency_from_ISO('USD')
             usd = book.currencies(mnemonic='USD')
-            value = Decimal(amount)
             transaction = Transaction(currency=usd,
                                       description=description,
                                       splits=[
-                                          Split(value=value, account=credit),
-                                          Split(value=-value, account=debit)
+                                          Split(value=amount, account=credit),
+                                          Split(value=-amount, account=debit)
                                       ])
             book.save()
             return True
@@ -101,4 +110,9 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
 
     except GnucashException as gce:
         print('Failed to add the transaction')
+        return False
+
+    except ValueError as ve:
+        print('Failed to add the transaction with ValueError:')
+        print(ve)
         return False
