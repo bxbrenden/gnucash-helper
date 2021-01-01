@@ -155,14 +155,14 @@ def git_pull(gnucash_dir):
         return False
 
 
-def git_add(gnucash_dir):
-    '''Run `git add .` in the context of the GnuCash book directory.
+def git_add(gnucash_dir, gnucash_book):
+    '''Run `git add {gnucash_book}` in the context of the GnuCash book directory.
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
-    cmd = f'git -C {gnucash_dir} add .'
+    cmd = f'git -C {gnucash_dir} add {gnucash_book}'
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        print('Successfully ran `git add .` in GnuCash directory')
+        print(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
         return True
     else:
         print('Error: failed to run a `git add` command.\
@@ -202,10 +202,10 @@ def git_push(gnucash_dir):
         return False
 
 
-def git_add_commit_and_push(gnucash_dir, commit_message):
+def git_add_commit_and_push(gnucash_dir, gnucash_book, commit_message):
     '''Run `git add .`, `git commit -m "message"`, and `git push`,
        all in the context of the directory that contains your GnuCash file.'''
-    added = git_add(gnucash_dir)
+    added = git_add(gnucash_dir, gnucash_book)
     if added:
         committed = git_commit(gnucash_dir, commit_message)
         if committed:

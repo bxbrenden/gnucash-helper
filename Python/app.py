@@ -74,7 +74,7 @@ def index():
         #  Flash the results to the screen in the browser
         pulled = git_pull(gnucash_dir)
         if pulled:
-            git_result, git_output = git_add_commit_and_push(gnucash_dir, descrip)
+            git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
             if added_txn and git_result:
                 flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
             else:
