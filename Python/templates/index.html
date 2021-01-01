@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} GnuCash Helper  {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+  <h1>Enter a Transaction</h1>
+</div>
+{{ wtf.quick_form(form) }}
+{% endblock %}
