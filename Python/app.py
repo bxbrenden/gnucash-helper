@@ -50,8 +50,8 @@ class TransactionForm(FlaskForm):
 #    gnucash_dir = get_gnucash_dir()
 #    path_to_book = gnucash_dir + '/' + book_name
 #    gnucash_book = open_book(path_to_book, readonly=True)
-    accounts = [acc.fullname for acc in list_accounts(gnucash_book)]
-    gnucash_book.close()
+    accounts = [acc.fullname for acc in list_accounts(self.gnucash_book)]
+#    gnucash_book.close()
     debit = SelectField('Source Account (Debit)',
                         validators=[DataRequired()],
                         choices=accounts,
