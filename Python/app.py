@@ -42,10 +42,14 @@ logger.addHandler(fh)
 
 
 class TransactionForm(FlaskForm):
-    book_name = get_book_name_from_env()
-    gnucash_dir = get_gnucash_dir()
-    path_to_book = gnucash_dir + '/' + book_name
-    gnucash_book = open_book(path_to_book, readonly=True)
+    def __init__(self, book):
+        super()
+        self.gnucash_book = book
+
+#    book_name = get_book_name_from_env()
+#    gnucash_dir = get_gnucash_dir()
+#    path_to_book = gnucash_dir + '/' + book_name
+#    gnucash_book = open_book(path_to_book, readonly=True)
     accounts = [acc.fullname for acc in list_accounts(gnucash_book)]
     gnucash_book.close()
     debit = SelectField('Source Account (Debit)',
@@ -97,13 +101,13 @@ def configure_git():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger = logging.getLogger(__name__)
-    form = TransactionForm()
+    gnucash_book = open_book(path_to_book)
+    form = TransactionForm(gnucash_book)
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
         book_name = get_book_name_from_env()
         gnucash_dir = get_gnucash_dir()
         path_to_book = gnucash_dir + '/' + book_name
-        gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
         credit = form.credit.data
