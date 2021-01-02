@@ -9,7 +9,8 @@ from gnucash_helper import list_accounts,\
                            get_github_token_and_url_from_env,\
                            git_ensure_cloned,\
                            git_set_user_and_email,\
-                           get_git_user_name_and_email_from_env
+                           get_git_user_name_and_email_from_env,\
+                           git_ensure_discard_uncommitted
 
 from decimal import Decimal, ROUND_HALF_UP
 import logging
@@ -109,6 +110,10 @@ def index():
         debit = form.debit.data
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
+
+        # Ensure that any uncommitted changes are discarded
+        # There should never be uncommitted changes, but there are for some reason
+        git_ensure_discard_uncommitted(gnucash_dir, book_name)
 
         # Run a git pull to ensure latest version of budget
         #  If it works, try to add, commit, and push the changes.

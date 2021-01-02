@@ -252,6 +252,49 @@ def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
             return False
 
 
+def git_check_uncommitted(gnucash_dir):
+    '''Run `git status` in the context of the GnuCash directory to check for
+       uncommitted changes. If there are uncommitted changes, return True.
+       Otherwise, return False if there are no changes to the git repo.'''
+    logger = logging.getLogger(__name__)
+    cmd = f'git -C {gnucash_dir} status'
+    run = run_shell_command(cmd)
+
+    changed_str = 'Changes not staged for commit:'
+    stdout = run.stdout.decode('utf-8')
+    logger.info('Checking for uncommitted changes to the GnuCash git repo.')
+
+    if changed_str in stdout:
+        logger.warning('There are uncommitted changes in the GnuCash git repo.')
+        return True
+    else:
+        logger.info('There were no uncommitted changes to the GnuCash git repo.')
+        return False
+
+
+
+def git_ensure_discard_uncommitted(gnucash_dir, book_name):
+    '''Run `git checkout` against the GnuCash file to discard any uncommitted
+       changes. This needs to be done because even just OPENING a GnuCash
+       book, making no changes, and closing it results in a modified file.
+       This, in turn, makes `git pull` break because it can't merge.'''
+    logger = logging.getLogger(__name)
+    uncommitted_changes = git_check_uncommitted(gnucash_dir)
+
+    if uncommitted_changes:
+        cmd = f'git -C "{gnucash_dir}" checkout "{book_name}"'
+        logger.info('Running `git checkout` to discard uncommitted changes')
+        logger.info(cmd)
+        run = run_shell_command(cmd)
+
+        if run.returncode == 0:
+            logger.info(f'Successfully ran "{cmd}" to clear uncommitted changes')
+        else:
+            logger.critical(f'Failed while running command {cmd} to clear changes:')
+            logger.critical(run)
+            sys.exit(1)
+
+
 def git_pull(gnucash_dir):
     '''Run a `git pull` command in the directory with the GnuCash book.'''
     logger = logging.getLogger(__name__)
