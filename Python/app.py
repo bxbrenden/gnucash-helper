@@ -26,20 +26,18 @@ from wtforms import DecimalField,\
 
 from wtforms.validators import DataRequired
 
-
-def get_logger():
-      logger = logging.getLogger(__name__)
-      logger.setLevel(logging.DEBUG)
-      ch = logging.StreamHandler()
-      ch.setLevel(logging.DEBUG)
-      fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
-      fh.setLevel(logging.DEBUG)
-      formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-      ch.setFormatter(formatter)
-      fh.setFormatter(formatter)
-      logger.addHandler(ch)
-      logger.addHandler(fh)
-      return logger
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 class TransactionForm(FlaskForm):
@@ -80,7 +78,6 @@ def configure_git():
     '''Do all the legwork of setting up git user, git user's email,
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
-    logger = logging.getLogger(__name__)
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -98,7 +95,6 @@ def configure_git():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    logger = logging.getLogger(__name__)
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
