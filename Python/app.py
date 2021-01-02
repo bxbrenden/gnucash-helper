@@ -27,19 +27,17 @@ from wtforms import DecimalField,\
 from wtforms.validators import DataRequired
 
 
-def get_logger():
-      logger = logging.getLogger(__name__)
-      logger.setLevel(logging.DEBUG)
-      ch = logging.StreamHandler()
-      ch.setLevel(logging.DEBUG)
-      fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
-      fh.setLevel(logging.DEBUG)
-      formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-      ch.setFormatter(formatter)
-      fh.setFormatter(formatter)
-      logger.addHandler(ch)
-      logger.addHandler(fh)
-      return logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 class TransactionForm(FlaskForm):
@@ -71,8 +69,6 @@ app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
 
 bootstrap = Bootstrap(app)
-
-logger = get_logger()
 
 
 @app.before_first_request
