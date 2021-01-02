@@ -226,8 +226,10 @@ def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
        The `gh_url` var should be an HTTPS URL to your GnuCash GitHub repo.
        The `gh_token` var is a Personal Access Token from GitHub.'''
     logger = logging.getLogger(__name__)
+    logger.info('Checking whether the GnuCash GitHub repo was already cloned')
     repo_exists = os.path.exists(gnucash_dir)
     if repo_exists:
+        logger.info('GnuCash GitHub repository folder exists. Not cloning.')
         return True
     else:
         clone_url = gh_url.replace('https://', f'https://{gh_token}@')

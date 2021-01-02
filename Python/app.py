@@ -72,6 +72,8 @@ app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
 
 bootstrap = Bootstrap(app)
 
+logger = get_logger()
+
 
 @app.before_first_request
 def configure_git():
@@ -96,7 +98,7 @@ def configure_git():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
