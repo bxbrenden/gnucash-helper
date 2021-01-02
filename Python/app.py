@@ -94,6 +94,17 @@ def configure_git():
         sys.exit(1)
 
 
+@app.before_request
+def git_ensure_good_state():
+    '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
+    logger = logging.getLogger(__name__)
+    logger.critical('Running pre-request git cleanup commands')
+    gnucash_dir = get_gnucash_dir()
+    book_name = get_book_name_from_env()
+    git_ensure_discard_uncommitted(gnucash_dir, book_name)
+    git_pull(gnucash_dir)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger = logging.getLogger(__name__)
@@ -111,29 +122,18 @@ def index():
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
 
-        # Ensure that any uncommitted changes are discarded
-        # There should never be uncommitted changes, but there are for some reason
-        git_ensure_discard_uncommitted(gnucash_dir, book_name)
-
-        # Run a git pull to ensure latest version of budget
-        #  If it works, try to add, commit, and push the changes.
-        #  Flash the results to the screen in the browser
-        pulled = git_pull(gnucash_dir)
-        if pulled:
-            git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
-            if added_txn and git_result:
-                flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
-                logger.info('Transaction for ${float(form.amount.data):.2f} \
-                        was saved to the GnuCash book by the web app.')
-            else:
-                failure_msg = f'Transaction for ${float(form.amount.data):.2f}\
-                        failed with an error:'
-                flash(failure_msg, 'error')
-                flash(git_output, 'error')
-                logger.critical(failure_msg)
-                logger.critical(git_result)
+        git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
+        if added_txn and git_result:
+            flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
+            logger.info('Transaction for ${float(form.amount.data):.2f} \
+                    was saved to the GnuCash book by the web app.')
         else:
-            logger.critical('Git pull failed, so all subsequent steps weren\'t attempted')
+            failure_msg = f'Transaction for ${float(form.amount.data):.2f}\
+                    failed with an error:'
+            flash(failure_msg, 'error')
+            flash(git_output, 'error')
+            logger.critical(failure_msg)
+            logger.critical(git_result)
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
 
