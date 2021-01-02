@@ -55,10 +55,10 @@ def list_accounts(book):
     '''List accounts in an existing book.
        `book` should be the fully qualified path to the GnuCash book.'''
     book = open_book(book, readonly=True)
-    accounts = book.accounts
+    accounts = sorted([x.fullname for x in book.accounts])
     book.close()
 
-    return sorted([x.fullname for x in accounts])
+    return accounts
 
 
 def get_account(account_name, book):
