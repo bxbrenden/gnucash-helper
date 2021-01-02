@@ -226,7 +226,7 @@ def git_pull(gnucash_dir):
 def git_add(gnucash_dir, gnucash_book):
     '''Run `git add {gnucash_book}` in the context of the GnuCash book directory.
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
-    cmd = f'git -C {gnucash_dir} add {gnucash_book}'
+    cmd = f'git -C "{gnucash_dir}" add "{gnucash_book}"'
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
