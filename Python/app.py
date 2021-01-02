@@ -16,6 +16,7 @@ import logging
 from os import environ as env
 
 from flask import Flask, render_template, session, redirect, url_for, flash
+from flask.logging import default_handler
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
@@ -67,6 +68,7 @@ class TransactionForm(FlaskForm):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
+app.logger.removeHandler(default_handler)
 
 bootstrap = Bootstrap(app)
 
