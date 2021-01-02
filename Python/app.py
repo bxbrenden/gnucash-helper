@@ -9,12 +9,15 @@ from gnucash_helper import list_accounts,\
                            get_github_token_and_url_from_env,\
                            git_ensure_cloned,\
                            git_set_user_and_email,\
-                           get_git_user_name_and_email_from_env
+                           get_git_user_name_and_email_from_env,\
+                           git_ensure_discard_uncommitted
 
 from decimal import Decimal, ROUND_HALF_UP
+import logging
 from os import environ as env
 
 from flask import Flask, render_template, session, redirect, url_for, flash
+from flask.logging import default_handler
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
@@ -26,18 +29,30 @@ from wtforms import DecimalField,\
 from wtforms.validators import DataRequired
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
+
+
 class TransactionForm(FlaskForm):
     book_name = get_book_name_from_env()
     gnucash_dir = get_gnucash_dir()
     path_to_book = gnucash_dir + '/' + book_name
-    gnucash_book = open_book(path_to_book, readonly=True)
-    accounts = [acc.fullname for acc in list_accounts(gnucash_book)]
-    gnucash_book.close()
-    debit = SelectField('Source Account (Debit)',
+    accounts = list_accounts(path_to_book)
+
+    debit = SelectField('From Account (Debit)',
                         validators=[DataRequired()],
                         choices=accounts,
                         validate_choice=True)
-    credit = SelectField('Destination Account (Credit)',
+    credit = SelectField('To Account (Credit)',
                          validators=[DataRequired()],
                          choices=accounts,
                          validate_choice=True)
@@ -53,12 +68,17 @@ class TransactionForm(FlaskForm):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
+app.logger.removeHandler(default_handler)
 
 bootstrap = Bootstrap(app)
 
 
 @app.before_first_request
 def configure_git():
+    '''Do all the legwork of setting up git user, git user's email,
+       personal access token, repo URL, and ensuring the repo has
+       already been cloned (clone should already be done by docker).'''
+    logger = logging.getLogger(__name__)
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -67,15 +87,27 @@ def configure_git():
     if git_configured:
         cloned = git_ensure_cloned(gnucash_dir, gh_token, gh_url)
         if not cloned:
-            print('Git clone of GitHub repo failed. Exiting')
+            logger.critical('Git clone of GitHub repo failed. Exiting')
             sys.exit(1)
     else:
-        print('git configuration of name and email failed. Exiting')
+        logger.critical('git configuration of name and email failed. Exiting')
         sys.exit(1)
+
+
+@app.before_request
+def git_ensure_good_state():
+    '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
+    logger = logging.getLogger(__name__)
+    logger.critical('Running pre-request git cleanup commands')
+    gnucash_dir = get_gnucash_dir()
+    book_name = get_book_name_from_env()
+    git_ensure_discard_uncommitted(gnucash_dir, book_name)
+    git_pull(gnucash_dir)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    logger = logging.getLogger(__name__)
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
@@ -90,19 +122,17 @@ def index():
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
 
-        # Run a git pull to ensure latest version of budget
-        #  If it works, try to add, commit, and push the changes.
-        #  Flash the results to the screen in the browser
-        pulled = git_pull(gnucash_dir)
-        if pulled:
-            git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
-            if added_txn and git_result:
-                flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
-            else:
-                flash(f'Transaction failed with an error!', 'error')
-                flash(git_output, 'error')
+        git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
+        if added_txn and git_result:
+            success_msg = f'Transaction for ${float(form.amount.data):.2f} saved!'
+            flash(success_msg)
+            logger.info(success_msg)
         else:
-            print('Git pull failed, so all subsequent steps weren\'t attempted')
+            failure_msg = f'Transaction ${float(form.amount.data):.2f} was saved'
+            flash(failure_msg, 'error')
+            flash(git_output, 'error')
+            logger.critical(failure_msg)
+            logger.critical(git_result)
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
 
