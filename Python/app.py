@@ -5,7 +5,11 @@ from gnucash_helper import list_accounts,\
                            add_transaction,\
                            get_gnucash_dir,\
                            git_pull,\
-                           git_add_commit_and_push
+                           git_add_commit_and_push,\
+                           get_github_token_and_url_from_env,\
+                           git_ensure_cloned,\
+                           git_set_user_and_email,\
+                           get_git_user_name_and_email_from_env
 
 from decimal import Decimal, ROUND_HALF_UP
 from os import environ as env
@@ -53,6 +57,23 @@ app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
 bootstrap = Bootstrap(app)
 
 
+@app.before_first_request
+def configure_git():
+    gnucash_dir = get_gnucash_dir()
+    gh_token, gh_url = get_github_token_and_url_from_env()
+    git_user, git_email = get_git_user_name_and_email_from_env()
+    git_configured = git_set_user_and_email(git_user, git_email)
+
+    if git_configured:
+        cloned = git_ensure_cloned(gnucash_dir, gh_token, gh_url)
+        if not cloned:
+            print('Git clone of GitHub repo failed. Exiting')
+            sys.exit(1)
+    else:
+        print('git configuration of name and email failed. Exiting')
+        sys.exit(1)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = TransactionForm()
@@ -89,3 +110,8 @@ def index():
 @app.errorhandler(404)
 def page_nout_found(e):
     return render_template('404.html')
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html')

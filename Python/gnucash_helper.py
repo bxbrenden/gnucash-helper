@@ -1,4 +1,5 @@
 from decimal import Decimal
+import os
 from os import environ as env
 import shlex
 import subprocess
@@ -132,12 +133,79 @@ def get_gnucash_dir():
         return gnucash_dir
 
 
+def get_git_user_name_and_email_from_env():
+    try:
+        git_user = env['GIT_USER']
+        git_email = env['GIT_EMAIL']
+    except KeyError as ke:
+        print('Error: failed to source {ke} from env var. Make sure to set it')
+        sys.exit(1)
+    else:
+        return (git_user, git_email)
+
+
+def get_github_token_and_url_from_env():
+    try:
+        gh_token = env['GITHUB_TOKEN']
+        gh_url = env['GITHUB_GNUCASH_URL']
+    except KeyError as ke:
+        print(f'Error: failed to source env var {ke}. Ensure it is set')
+        sys.exit(1)
+    else:
+        return (gh_token, gh_url)
+
+
 def run_shell_command(command_str):
     '''Run a shell comand using subprocess.run. Return completed command obj'''
     command = shlex.split(command_str)
     run = subprocess.run(command, capture_output=True)
 
     return run
+
+
+def git_set_user_and_email(username, email):
+    '''Set the user's name, e.g. "Brenden Hyde" and email address.
+       This is used by git when writing commit messages for attribution.'''
+    user_cmd = f'git config --global user.name {username}'
+    email_cmd = f'git config --global user.email {email}'
+
+    user_run = run_shell_command(user_cmd)
+    email_run = run_shell_command(email_cmd)
+    if user_run.returncode == 0 and email_run.returncode == 0:
+        print('Successfully configured git user\'s name and email')
+        return True
+    elif user_run.returncode == 0 and email_run.returncode != 0:
+        print('Error: git global config set for user\'s name but not email')
+        return False
+    elif user_run.returncode != 0 and email_run.returncode == 0:
+        print('Error: git global config set for user\'s email but not name')
+        return False
+    else:
+        print('Git global config of user\'s name and email is messed up!')
+        return False
+
+
+def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
+    '''Ensure the gnucash git repo is already present, and clone it if not.
+       The `gh_url` var should be an HTTPS URL to your GnuCash GitHub repo.
+       The `gh_token` var is a Personal Access Token from GitHub.'''
+    repo_exists = os.path.exists(gnucash_dir)
+    if repo_exists:
+        return True
+    else:
+        clone_url = gh_url.replace('https://', f'https://{gh_token}@')
+        print('Cloning GnuCash GitHub repo from URL:')
+        print('    {clone_url}')
+        cmd = f'git clone {clone_url}'
+        run = run_shell_command(cmd)
+
+        if run.returncode == 0:
+            print('Successfully cloned the GnuCash GitHub repo.')
+            return True
+        else:
+            print('Error: failed to clone the GnuCash GitHub repo:')
+            print(run)
+            return False
 
 
 def git_pull(gnucash_dir):

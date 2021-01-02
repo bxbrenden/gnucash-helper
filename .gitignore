@@ -7,3 +7,4 @@ Python/__pycache__/
 Python/*.gnucash
 Python/cleanup
 Python/*.swp
+Python/Dockerfile
