@@ -262,13 +262,13 @@ def git_check_uncommitted(gnucash_dir):
 
     changed_str = 'Changes not staged for commit:'
     stdout = run.stdout.decode('utf-8')
-    logger.info('Checking for uncommitted changes to the GnuCash git repo.')
+    logger.critical('Checking for uncommitted changes to the GnuCash git repo.')
 
     if changed_str in stdout:
-        logger.warning('There are uncommitted changes in the GnuCash git repo.')
+        logger.critical('There are uncommitted changes in the GnuCash git repo.')
         return True
     else:
-        logger.info('There were no uncommitted changes to the GnuCash git repo.')
+        logger.critical('There were no uncommitted changes to the GnuCash git repo.')
         return False
 
 
@@ -283,12 +283,12 @@ def git_ensure_discard_uncommitted(gnucash_dir, book_name):
 
     if uncommitted_changes:
         cmd = f'git -C "{gnucash_dir}" checkout "{book_name}"'
-        logger.info('Running `git checkout` to discard uncommitted changes')
-        logger.info(cmd)
+        logger.critical('Running `git checkout` to discard uncommitted changes')
+        logger.critical(cmd)
         run = run_shell_command(cmd)
 
         if run.returncode == 0:
-            logger.info(f'Successfully ran "{cmd}" to clear uncommitted changes')
+            logger.critical(f'Successfully ran "{cmd}" to clear uncommitted changes')
         else:
             logger.critical(f'Failed while running command {cmd} to clear changes:')
             logger.critical(run)
@@ -318,17 +318,17 @@ def git_add(gnucash_dir, gnucash_book):
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
     logger = logging.getLogger(__name__)
     cmd = f'git -C "{gnucash_dir}" add "{gnucash_book}"'
-    logger.info('Running `git add` with the following command:')
-    logger.info(cmd)
+    logger.critical('Running `git add` with the following command:')
+    logger.critical(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logger.info(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
+        logger.critical(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
         return True
     else:
-        logger.error('Failed to run a `git add` command.\
+        logger.critical('Failed to run a `git add` command.\
                   See below for command output')
-        logger.error(run)
+        logger.critical(run)
         return False
 
 
@@ -336,13 +336,13 @@ def git_commit(gnucash_dir, message):
     '''Run `git commit -m "{message}"` in the context of the GnuCash dir'''
     logger = logging.getLogger(__name__)
     cmd = f'git -C {gnucash_dir} commit -m "{message}"'
-    logger.info('Running `git commit` with the following command:')
-    logger.info(cmd)
+    logger.critical('Running `git commit` with the following command:')
+    logger.critical(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logger.info(f'Successfully ran the following git commit command:')
-        logger.info(cmd)
+        logger.critical(f'Successfully ran the following git commit command:')
+        logger.critical(cmd)
         return True
     else:
         logger.error('Failed to run a `git commit` command.\
