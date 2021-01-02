@@ -278,7 +278,7 @@ def git_ensure_discard_uncommitted(gnucash_dir, book_name):
        changes. This needs to be done because even just OPENING a GnuCash
        book, making no changes, and closing it results in a modified file.
        This, in turn, makes `git pull` break because it can't merge.'''
-    logger = logging.getLogger(__name)
+    logger = logging.getLogger(__name__)
     uncommitted_changes = git_check_uncommitted(gnucash_dir)
 
     if uncommitted_changes:
