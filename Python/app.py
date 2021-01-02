@@ -12,6 +12,7 @@ from gnucash_helper import list_accounts,\
                            get_git_user_name_and_email_from_env
 
 from decimal import Decimal, ROUND_HALF_UP
+import logging
 from os import environ as env
 
 from flask import Flask, render_template, session, redirect, url_for, flash
@@ -24,6 +25,21 @@ from wtforms import DecimalField,\
                     TextAreaField
 
 from wtforms.validators import DataRequired
+
+
+def get_logger():
+      logger = logging.getLogger(__name__)
+      logger.setLevel(logging.DEBUG)
+      ch = logging.StreamHandler()
+      ch.setLevel(logging.DEBUG)
+      fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+      fh.setLevel(logging.DEBUG)
+      formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+      ch.setFormatter(formatter)
+      fh.setFormatter(formatter)
+      logger.addHandler(ch)
+      logger.addHandler(fh)
+      return logger
 
 
 class TransactionForm(FlaskForm):
@@ -59,6 +75,10 @@ bootstrap = Bootstrap(app)
 
 @app.before_first_request
 def configure_git():
+    '''Do all the legwork of setting up git user, git user's email,
+       personal access token, repo URL, and ensuring the repo has
+       already been cloned (clone should already be done by docker).'''
+    logger = get_logger()
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -67,15 +87,16 @@ def configure_git():
     if git_configured:
         cloned = git_ensure_cloned(gnucash_dir, gh_token, gh_url)
         if not cloned:
-            print('Git clone of GitHub repo failed. Exiting')
+            logger.critical('Git clone of GitHub repo failed. Exiting')
             sys.exit(1)
     else:
-        print('git configuration of name and email failed. Exiting')
+        logger.critical('git configuration of name and email failed. Exiting')
         sys.exit(1)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    logger = get_logger()
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
@@ -98,11 +119,17 @@ def index():
             git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
             if added_txn and git_result:
                 flash(f'Transaction for ${float(form.amount.data):.2f} saved!')
+                logger.info('Transaction for ${float(form.amount.data):.2f} \
+                        was saved to the GnuCash book by the web app.')
             else:
-                flash(f'Transaction failed with an error!', 'error')
+                failure_msg = f'Transaction for ${float(form.amount.data):.2f}\
+                        failed with an error:'
+                flash(failure_msg, 'error')
                 flash(git_output, 'error')
+                logger.critical(failure_msg)
+                logger.critical(git_result)
         else:
-            print('Git pull failed, so all subsequent steps weren\'t attempted')
+            logger.critical('Git pull failed, so all subsequent steps weren\'t attempted')
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
 
