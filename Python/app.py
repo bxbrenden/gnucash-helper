@@ -78,7 +78,7 @@ def configure_git():
     '''Do all the legwork of setting up git user, git user's email,
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()

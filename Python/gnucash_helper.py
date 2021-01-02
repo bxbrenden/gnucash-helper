@@ -28,7 +28,7 @@ def get_logger():
 
 def get_book_name_from_env():
     '''Get the GnuCash book name from an environment variable'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         book_name = env['GNUCASH_BOOK_NAME']
     except KeyError as ke:
@@ -40,7 +40,7 @@ def get_book_name_from_env():
 
 def open_book(book_name, readonly=False):
     '''Open a GnuCash book for reading and potentially writing'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         book = piecash.open_book(book_name, readonly=readonly)
     except GnucashException as gce:
@@ -73,7 +73,7 @@ def get_account(account_name, book):
 def add_account(book, new_acct_name, parent, currency='USD'):
     '''Add a GnuCash account with name `new_acct_name` and a parent account of `parent`.
     Optionally set USD'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     parent_account = book.accounts.get(fullname=parent)
     if parent_account:
         child_accts = [child.name.lower() for child in parent_account.children]
@@ -110,7 +110,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
        `amount` should be a float out to 2 decimal places for the value of the transaction.
        `debit_acct` and `credit_acct` should be the names of the accounts as given by the .fullname
            method from a GnuCash Account, e.g. book.accounts.get(fullname="Expenses:Food")'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         credit = get_account(credit_acct, book)
         debit = get_account(debit_acct, book)
@@ -149,7 +149,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
 
 def get_gnucash_dir():
     '''Get the fully qualified path of the directory of your .gnucash file'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         gnucash_dir = env['GNUCASH_DIR']
     except KeyError as ke:
@@ -164,7 +164,7 @@ def get_git_user_name_and_email_from_env():
     '''Get the git user's name and email address from environment variables.
        Note: these are NOT the _GitHub_ username and email, necessarily. Rather,
        these are used for git commit messages for attribution's sake.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         git_user = env['GIT_USER']
         git_email = env['GIT_EMAIL']
@@ -178,7 +178,7 @@ def get_git_user_name_and_email_from_env():
 def get_github_token_and_url_from_env():
     '''Get the user's GitHub Personal Access Token and repo URL from
        environment variables.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     try:
         gh_token = env['GITHUB_TOKEN']
         gh_url = env['GITHUB_GNUCASH_URL']
@@ -201,7 +201,7 @@ def git_set_user_and_email(username, email):
     '''Set the git global config user's name, e.g. "Brenden Hyde" and
        email address. This is used by git when writing commit messages
        for attribution.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     user_cmd = f'git config --global user.name {username}'
     email_cmd = f'git config --global user.email {email}'
 
@@ -225,7 +225,7 @@ def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
     '''Ensure the gnucash git repo is already present, and clone it if not.
        The `gh_url` var should be an HTTPS URL to your GnuCash GitHub repo.
        The `gh_token` var is a Personal Access Token from GitHub.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     repo_exists = os.path.exists(gnucash_dir)
     if repo_exists:
         return True
@@ -249,7 +249,7 @@ def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
 
 def git_pull(gnucash_dir):
     '''Run a `git pull` command in the directory with the GnuCash book.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     cmd = f'git -C {gnucash_dir} pull'
     logger.info('Running `git pull` with the following command:')
     logger.info(cmd)
@@ -268,7 +268,7 @@ def git_pull(gnucash_dir):
 def git_add(gnucash_dir, gnucash_book):
     '''Run `git add {gnucash_book}` in the context of the GnuCash book directory.
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     cmd = f'git -C "{gnucash_dir}" add "{gnucash_book}"'
     logger.info('Running `git add` with the following command:')
     logger.info(cmd)
@@ -286,7 +286,7 @@ def git_add(gnucash_dir, gnucash_book):
 
 def git_commit(gnucash_dir, message):
     '''Run `git commit -m "{message}"` in the context of the GnuCash dir'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     cmd = f'git -C {gnucash_dir} commit -m "{message}"'
     logger.info('Running `git commit` with the following command:')
     logger.info(cmd)
@@ -305,7 +305,7 @@ def git_commit(gnucash_dir, message):
 
 def git_push(gnucash_dir):
     '''Run a `git push` command in the context of the GnuCash directory'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     cmd = f'git -C {gnucash_dir} push'
     logger.info('Running `git push` with the following command:')
     logger.info(cmd)
@@ -324,7 +324,7 @@ def git_push(gnucash_dir):
 def git_add_commit_and_push(gnucash_dir, gnucash_book, commit_message):
     '''Run `git add .`, `git commit -m "message"`, and `git push`,
        all in the context of the directory that contains your GnuCash file.'''
-    logger = get_logger()
+    logger = logging.getLogger(__name__)
     added = git_add(gnucash_dir, gnucash_book)
     if added:
         committed = git_commit(gnucash_dir, commit_message)
