@@ -125,7 +125,7 @@ def index():
         git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
         if added_txn and git_result:
             success_msg = f'Transaction for ${float(form.amount.data):.2f} saved!'
-            flash(success_msg)
+            flash(success_msg, category='success')
             logger.info(success_msg)
         else:
             failure_msg = f'Transaction ${float(form.amount.data):.2f} was saved'
