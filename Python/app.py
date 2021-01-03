@@ -122,13 +122,20 @@ def index():
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
 
+        if added_txn:
+            flash(f'Transaction for {float(amount):.2f} saved to GnuCash file.',
+                    'success')
+        else:
+            flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
+                    'danger')
+
         git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
-        if added_txn and git_result:
-            success_msg = f'Transaction for ${float(form.amount.data):.2f} saved!'
-            flash(success_msg, category='success')
+        if git_result:
+            success_msg = f'Transaction for ${float(form.amount.data):.2f} committed to GitHub.'
+            flash(success_msg, 'success')
             logger.info(success_msg)
         else:
-            failure_msg = f'Transaction ${float(form.amount.data):.2f} was saved'
+            failure_msg = f'Transaction ${float(form.amount.data):.2f} not synced to GitHub'
             flash(failure_msg, 'danger')
             flash(git_output, 'danger')
             logger.critical(failure_msg)
