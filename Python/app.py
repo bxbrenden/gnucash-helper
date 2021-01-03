@@ -78,7 +78,7 @@ def configure_git():
     '''Do all the legwork of setting up git user, git user's email,
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
-    logger = logging.getLogger(__name__)
+    global logger
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -97,7 +97,7 @@ def configure_git():
 @app.before_request
 def git_ensure_good_state():
     '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
-    logger = logging.getLogger(__name__)
+    global logger
     logger.info('Running pre-request git cleanup commands')
     gnucash_dir = get_gnucash_dir()
     book_name = get_book_name_from_env()
@@ -107,7 +107,7 @@ def git_ensure_good_state():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    logger = logging.getLogger(__name__)
+    global logger
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
