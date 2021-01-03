@@ -56,7 +56,7 @@ class TransactionForm(FlaskForm):
                          choices=accounts,
                          validate_choice=True)
     amount = DecimalField('Amount ($)',
-                        validators=[DataRequired('Do not include a dollar sign $')],
+                        validators=[DataRequired('Do not include a dollar sign or a comma.')],
                         places=2,
                         rounding=ROUND_HALF_UP,
                         render_kw={'placeholder': 'Ex: 4.20'})
