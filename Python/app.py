@@ -17,7 +17,6 @@ import logging
 from os import environ as env
 
 from flask import Flask, render_template, session, redirect, url_for, flash
-from flask.logging import default_handler
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
@@ -57,7 +56,7 @@ class TransactionForm(FlaskForm):
                          choices=accounts,
                          validate_choice=True)
     amount = DecimalField('Amount ($)',
-                        validators=[DataRequired('Do not include a dollar sign $')],
+                        validators=[DataRequired('Do not include a dollar sign or a comma.')],
                         places=2,
                         rounding=ROUND_HALF_UP,
                         render_kw={'placeholder': 'Ex: 4.20'})
@@ -68,8 +67,6 @@ class TransactionForm(FlaskForm):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
-app.logger.removeHandler(default_handler)
-
 bootstrap = Bootstrap(app)
 
 
@@ -78,7 +75,7 @@ def configure_git():
     '''Do all the legwork of setting up git user, git user's email,
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
-    logger = logging.getLogger(__name__)
+    global logger
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -97,7 +94,7 @@ def configure_git():
 @app.before_request
 def git_ensure_good_state():
     '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
-    logger = logging.getLogger(__name__)
+    global logger
     logger.info('Running pre-request git cleanup commands')
     gnucash_dir = get_gnucash_dir()
     book_name = get_book_name_from_env()
@@ -107,7 +104,7 @@ def git_ensure_good_state():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    logger = logging.getLogger(__name__)
+    global logger
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
