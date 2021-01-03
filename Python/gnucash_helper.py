@@ -14,7 +14,7 @@ def get_book_name_from_env():
     try:
         book_name = env['GNUCASH_BOOK_NAME']
     except KeyError as ke:
-        logging.critical(f'Error: could not get GnuCash book name from env. var. {ke}.')
+        logging.critical(f'Could not get GnuCash book name from env. var. {ke}.')
         sys.exit(1)
     else:
         return book_name
@@ -148,7 +148,7 @@ def get_git_user_name_and_email_from_env():
         git_user = env['GIT_USER']
         git_email = env['GIT_EMAIL']
     except KeyError as ke:
-        logging.critical(f'Error: failed to source {ke} from env var. Make sure to set it')
+        logging.critical(f'Failed to source {ke} from env var. Make sure to set it')
         sys.exit(1)
     else:
         return (git_user, git_email)
@@ -161,7 +161,7 @@ def get_github_token_and_url_from_env():
         gh_token = env['GITHUB_TOKEN']
         gh_url = env['GITHUB_GNUCASH_URL']
     except KeyError as ke:
-        logging.critical(f'Error: failed to source env var {ke}. Ensure it is set')
+        logging.critical(f'Failed to source env var {ke}. Ensure it is set')
         sys.exit(1)
     else:
         return (gh_token, gh_url)
@@ -188,10 +188,10 @@ def git_set_user_and_email(username, email):
         logging.info('Successfully configured git user\'s name and email')
         return True
     elif user_run.returncode == 0 and email_run.returncode != 0:
-        logging.error('Error: git global config set for user\'s name but not email')
+        logging.error('Git global config set for user\'s name but not email')
         return False
     elif user_run.returncode != 0 and email_run.returncode == 0:
-        logging.error('Error: git global config set for user\'s email but not name')
+        logging.error('Git global config set for user\'s email but not name')
         return False
     else:
         logging.error('Git global config of user\'s name and email is messed up!')
@@ -234,13 +234,13 @@ def git_check_uncommitted(gnucash_dir):
 
     changed_str = 'Changes not staged for commit:'
     stdout = run.stdout.decode('utf-8')
-    logging.critical('Checking for uncommitted changes to the GnuCash git repo.')
+    logging.info('Checking for uncommitted changes to the GnuCash git repo.')
 
     if changed_str in stdout:
-        logging.critical('There are uncommitted changes in the GnuCash git repo.')
+        logging.warning('There are uncommitted changes in the GnuCash git repo.')
         return True
     else:
-        logging.critical('There were no uncommitted changes to the GnuCash git repo.')
+        logging.info('There were no uncommitted changes to the GnuCash git repo.')
         return False
 
 
@@ -253,12 +253,12 @@ def git_ensure_discard_uncommitted(gnucash_dir, book_name):
 
     if uncommitted_changes:
         cmd = f'git -C "{gnucash_dir}" checkout "{book_name}"'
-        logging.critical('Running `git checkout` to discard uncommitted changes')
-        logging.critical(cmd)
+        logging.info('Running `git checkout` to discard uncommitted changes')
+        logging.info(cmd)
         run = run_shell_command(cmd)
 
         if run.returncode == 0:
-            logging.critical(f'Successfully ran "{cmd}" to clear uncommitted changes')
+            logging.info(f'Successfully ran "{cmd}" to clear uncommitted changes')
         else:
             logging.critical(f'Failed while running command {cmd} to clear changes:')
             logging.critical(run)
@@ -276,9 +276,9 @@ def git_pull(gnucash_dir):
         logging.info('successfully ran `git pull`')
         return True
     else:
-        logging.error('Error: failed to run a `git pull` command.\
+        logging.critical('Failed to run a `git pull` command.\
                 See below for command output')
-        logging.error(run)
+        logging.critical(run)
         return False
 
 
@@ -286,12 +286,12 @@ def git_add(gnucash_dir, gnucash_book):
     '''Run `git add {gnucash_book}` in the context of the GnuCash book directory.
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
     cmd = f'git -C "{gnucash_dir}" add "{gnucash_book}"'
-    logging.critical('Running `git add` with the following command:')
-    logging.critical(cmd)
+    logging.info('Running `git add` with the following command:')
+    logging.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.critical(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
+        logging.info(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
         return True
     else:
         logging.critical('Failed to run a `git add` command.\
@@ -303,13 +303,13 @@ def git_add(gnucash_dir, gnucash_book):
 def git_commit(gnucash_dir, message):
     '''Run `git commit -m "{message}"` in the context of the GnuCash dir'''
     cmd = f'git -C {gnucash_dir} commit -m "{message}"'
-    logging.critical('Running `git commit` with the following command:')
-    logging.critical(cmd)
+    logging.info('Running `git commit` with the following command:')
+    logging.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.critical('Successfully ran the following git commit command:')
-        logging.critical(cmd)
+        logging.info('Successfully ran the following git commit command:')
+        logging.info(cmd)
         return True
     else:
         logging.error('Failed to run a `git commit` command.\
