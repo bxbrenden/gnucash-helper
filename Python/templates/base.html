@@ -1,7 +1,8 @@
 {% extends "bootstrap/base.html" %}
 {% block head %}
 {{ super() }}
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-128.png') }}">
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32.png') }}">
+<link rel="apple-touch-icon" type="image/png" href="{{ url_for('static', filename='favicon-128.png') }}">
 {% endblock %}
 {% block title %}GnuCash Helper{% endblock %}
 {% block navbar %}
