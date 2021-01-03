@@ -23,6 +23,7 @@ ADD requirements.txt requirements.txt
 ADD gnucash_helper.py gnucash_helper.py
 ADD app.py app.py
 COPY templates/ templates/
+COPY static/ static/
 
 RUN pip3 install -r requirements.txt
 EXPOSE 8000
