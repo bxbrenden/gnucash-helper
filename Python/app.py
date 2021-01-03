@@ -17,7 +17,6 @@ import logging
 from os import environ as env
 
 from flask import Flask, render_template, session, redirect, url_for, flash
-from flask.logging import default_handler
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
@@ -68,8 +67,6 @@ class TransactionForm(FlaskForm):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
-app.logger.removeHandler(default_handler)
-
 bootstrap = Bootstrap(app)
 
 
@@ -78,6 +75,7 @@ def configure_git():
     '''Do all the legwork of setting up git user, git user's email,
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
+    global logger
     gnucash_dir = get_gnucash_dir()
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
@@ -86,17 +84,18 @@ def configure_git():
     if git_configured:
         cloned = git_ensure_cloned(gnucash_dir, gh_token, gh_url)
         if not cloned:
-            logging.critical('Git clone of GitHub repo failed. Exiting')
+            logger.critical('Git clone of GitHub repo failed. Exiting')
             sys.exit(1)
     else:
-        logging.critical('git configuration of name and email failed. Exiting')
+        logger.critical('git configuration of name and email failed. Exiting')
         sys.exit(1)
 
 
 @app.before_request
 def git_ensure_good_state():
     '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
-    logging.info('Running pre-request git cleanup commands')
+    global logger
+    logger.info('Running pre-request git cleanup commands')
     gnucash_dir = get_gnucash_dir()
     book_name = get_book_name_from_env()
     git_ensure_discard_uncommitted(gnucash_dir, book_name)
@@ -105,6 +104,7 @@ def git_ensure_good_state():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global logger
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
@@ -130,13 +130,13 @@ def index():
         if git_result:
             success_msg = f'Transaction for ${float(form.amount.data):.2f} committed to GitHub.'
             flash(success_msg, 'success')
-            logging.info(success_msg)
+            logger.info(success_msg)
         else:
             failure_msg = f'Transaction ${float(form.amount.data):.2f} not synced to GitHub'
             flash(failure_msg, 'danger')
             flash(git_output, 'danger')
-            logging.critical(failure_msg)
-            logging.critical(git_result)
+            logger.critical(failure_msg)
+            logger.critical(git_result)
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
 
