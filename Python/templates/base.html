@@ -2,7 +2,7 @@
 {% block head %}
 {{ super() }}
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32.png') }}">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon-180x180.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('/', filename='apple-touch-icon-180x180.png') }}">
 {% endblock %}
 {% block title %}GnuCash Helper{% endblock %}
 {% block navbar %}
