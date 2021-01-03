@@ -129,8 +129,8 @@ def index():
             logger.info(success_msg)
         else:
             failure_msg = f'Transaction ${float(form.amount.data):.2f} was saved'
-            flash(failure_msg, 'error')
-            flash(git_output, 'error')
+            flash(failure_msg, 'danger')
+            flash(git_output, 'danger')
             logger.critical(failure_msg)
             logger.critical(git_result)
         return redirect(url_for('index'))

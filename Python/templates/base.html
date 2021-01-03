@@ -27,12 +27,15 @@
 {% block content %}
 <div class="container">
   {% with messages = get_flashed_messages(with_categories=True) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
     {% if messages %}
-      <ul class=flashes>
-        {% for category, message in messages %}
-	  <li class="{{ category}}">{{ message }}</li>
-	{% endfor %}
-      </ul>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissable" role="alert">
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+	</div>
+      {% endfor %}
     {% endif %}
   {% endwith %}
   {% block page_content %}
