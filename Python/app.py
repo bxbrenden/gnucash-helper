@@ -98,7 +98,7 @@ def configure_git():
 def git_ensure_good_state():
     '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
     logger = logging.getLogger(__name__)
-    logger.critical('Running pre-request git cleanup commands')
+    logger.info('Running pre-request git cleanup commands')
     gnucash_dir = get_gnucash_dir()
     book_name = get_book_name_from_env()
     git_ensure_discard_uncommitted(gnucash_dir, book_name)
