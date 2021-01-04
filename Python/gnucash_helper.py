@@ -20,10 +20,10 @@ def get_book_name_from_env():
         return book_name
 
 
-def open_book(book_name, readonly=False):
+def open_book(book_name, readonly=False, open_if_lock=True, do_backup=False):
     '''Open a GnuCash book for reading and potentially writing'''
     try:
-        book = piecash.open_book(book_name, readonly=readonly)
+        book = piecash.open_book(book_name, readonly=readonly, open_if_lock=open_if_lock, do_backup=do_backup)
     except GnucashException as gce:
         logging.critical(f'Error while attempting to open GnuCash book "{book_name}"')
         logging.critical(gce)
