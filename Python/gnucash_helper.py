@@ -8,13 +8,31 @@ import sys
 import piecash
 from piecash import Transaction, Split, GnucashException
 
+def configure_logging():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+    ch.setFormatter(formatter)
+    fh.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    return logger
+
+
+logger = configure_logging()
+
 
 def get_book_name_from_env():
     '''Get the GnuCash book name from an environment variable'''
     try:
         book_name = env['GNUCASH_BOOK_NAME']
     except KeyError as ke:
-        logging.critical(f'Could not get GnuCash book name from env. var. {ke}.')
+        logger.critical(f'Could not get GnuCash book name from env. var. {ke}.')
         sys.exit(1)
     else:
         return book_name
@@ -25,8 +43,8 @@ def open_book(book_name, readonly=False, open_if_lock=True, do_backup=False):
     try:
         book = piecash.open_book(book_name, readonly=readonly, open_if_lock=open_if_lock, do_backup=do_backup)
     except GnucashException as gce:
-        logging.critical(f'Error while attempting to open GnuCash book "{book_name}"')
-        logging.critical(gce)
+        logger.critical(f'Error while attempting to open GnuCash book "{book_name}"')
+        logger.critical(gce)
         sys.exit(1)
     else:
         return book
@@ -61,10 +79,10 @@ def add_account(book, new_acct_name, parent, currency='USD'):
     if parent_account:
         child_accts = [child.name.lower() for child in parent_account.children]
         if new_acct_name.lower() in child_accts:
-            logging.warning(f'The {new_acct_name} account already exists as a child of your {parent} account. Skipping')
+            logger.warning(f'The {new_acct_name} account already exists as a child of your {parent} account. Skipping')
             return False
     else:
-        logging.error(f'There was no parent account named "{parent}"')
+        logger.error(f'There was no parent account named "{parent}"')
         return False
 
     USD = book.commodities.get(mnemonic='USD')
@@ -76,15 +94,15 @@ def add_account(book, new_acct_name, parent, currency='USD'):
         try:
             book.save()
         except GnucashException as gce:
-            logging.critical('Encounted GnuCash Error while saving book:')
-            logging.critical(gce)
+            logger.critical('Encounted GnuCash Error while saving book:')
+            logger.critical(gce)
             sys.exit(1)
         else:
-            logging.info(f'Successfully saved book with new account "{new_acct_name}", child of parent account "{parent}"')
+            logger.info(f'Successfully saved book with new account "{new_acct_name}", child of parent account "{parent}"')
             return True
 
     else:
-        logging.error(f'There was no parent account named "{parent}" or no commodity named "USD"')
+        logger.error(f'There was no parent account named "{parent}" or no commodity named "USD"')
         return False
 
 
@@ -98,7 +116,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
         debit = get_account(debit_acct, book)
         if credit and debit:
             usd = book.currencies(mnemonic='USD')
-            logging.info('Creating a new transaction in the GnuCash book.')
+            logger.info('Creating a new transaction in the GnuCash book.')
             transaction = Transaction(currency=usd,
                                       description=description,
                                       splits=[
@@ -106,25 +124,25 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
                                           Split(value=-amount, account=debit)
                                       ])
             book.save()
-            logging.info('Successfully saved transaction')
+            logger.info('Successfully saved transaction')
             return True
 
         elif credit and not debit:
-            logging.error(f'The debit account {debit_acct} was not found. Skipping.')
+            logger.error(f'The debit account {debit_acct} was not found. Skipping.')
             return False
 
         elif debit and not credit:
-            logging.error(f'The credit account {credit_acct} was not found. Skipping.')
+            logger.error(f'The credit account {credit_acct} was not found. Skipping.')
             return False
 
     except GnucashException as gce:
-        logging.error('Failed to add the transaction')
-        logging.error(gce)
+        logger.error('Failed to add the transaction')
+        logger.error(gce)
         return False
 
     except ValueError as ve:
-        logging.error('Failed to add the transaction with ValueError:')
-        logging.error(ve)
+        logger.error('Failed to add the transaction with ValueError:')
+        logger.error(ve)
         return False
 
 
@@ -133,8 +151,8 @@ def get_gnucash_dir():
     try:
         gnucash_dir = env['GNUCASH_DIR']
     except KeyError as ke:
-        logging.critical(f'Error, could not get GnuCash directory {ke} from env var')
-        logging.critical('Make sure to set $GNUCASH_DIR')
+        logger.critical(f'Error, could not get GnuCash directory {ke} from env var')
+        logger.critical('Make sure to set $GNUCASH_DIR')
         sys.exit(1)
     else:
         return gnucash_dir
@@ -148,7 +166,7 @@ def get_git_user_name_and_email_from_env():
         git_user = env['GIT_USER']
         git_email = env['GIT_EMAIL']
     except KeyError as ke:
-        logging.critical(f'Failed to source {ke} from env var. Make sure to set it')
+        logger.critical(f'Failed to source {ke} from env var. Make sure to set it')
         sys.exit(1)
     else:
         return (git_user, git_email)
@@ -161,7 +179,7 @@ def get_github_token_and_url_from_env():
         gh_token = env['GITHUB_TOKEN']
         gh_url = env['GITHUB_GNUCASH_URL']
     except KeyError as ke:
-        logging.critical(f'Failed to source env var {ke}. Ensure it is set')
+        logger.critical(f'Failed to source env var {ke}. Ensure it is set')
         sys.exit(1)
     else:
         return (gh_token, gh_url)
@@ -185,16 +203,16 @@ def git_set_user_and_email(username, email):
     user_run = run_shell_command(user_cmd)
     email_run = run_shell_command(email_cmd)
     if user_run.returncode == 0 and email_run.returncode == 0:
-        logging.info('Successfully configured git user\'s name and email')
+        logger.info('Successfully configured git user\'s name and email')
         return True
     elif user_run.returncode == 0 and email_run.returncode != 0:
-        logging.error('Git global config set for user\'s name but not email')
+        logger.error('Git global config set for user\'s name but not email')
         return False
     elif user_run.returncode != 0 and email_run.returncode == 0:
-        logging.error('Git global config set for user\'s email but not name')
+        logger.error('Git global config set for user\'s email but not name')
         return False
     else:
-        logging.error('Git global config of user\'s name and email is messed up!')
+        logger.error('Git global config of user\'s name and email is messed up!')
         return False
 
 
@@ -202,26 +220,26 @@ def git_ensure_cloned(gnucash_dir, gh_token, gh_url):
     '''Ensure the gnucash git repo is already present, and clone it if not.
        The `gh_url` var should be an HTTPS URL to your GnuCash GitHub repo.
        The `gh_token` var is a Personal Access Token from GitHub.'''
-    logging.info('Checking whether the GnuCash GitHub repo was already cloned')
+    logger.info('Checking whether the GnuCash GitHub repo was already cloned')
     repo_exists = os.path.exists(gnucash_dir)
     if repo_exists:
-        logging.info('GnuCash GitHub repository folder exists. Not cloning.')
+        logger.info('GnuCash GitHub repository folder exists. Not cloning.')
         return True
     else:
         clone_url = gh_url.replace('https://', f'https://{gh_token}@')
-        logging.info('Cloning GnuCash GitHub repo from URL:')
-        logging.info('{clone_url}')
+        logger.info('Cloning GnuCash GitHub repo from URL:')
+        logger.info('{clone_url}')
         cmd = f'git clone {clone_url}'
-        logging.info('Running `git clone` with the following command:')
-        logging.info(cmd)
+        logger.info('Running `git clone` with the following command:')
+        logger.info(cmd)
         run = run_shell_command(cmd)
 
         if run.returncode == 0:
-            logging.info('Successfully cloned the GnuCash GitHub repo.')
+            logger.info('Successfully cloned the GnuCash GitHub repo.')
             return True
         else:
-            logging.error('Failed to clone the GnuCash GitHub repo:')
-            logging.error(run)
+            logger.error('Failed to clone the GnuCash GitHub repo:')
+            logger.error(run)
             return False
 
 
@@ -234,13 +252,13 @@ def git_check_uncommitted(gnucash_dir):
 
     changed_str = 'Changes not staged for commit:'
     stdout = run.stdout.decode('utf-8')
-    logging.info('Checking for uncommitted changes to the GnuCash git repo.')
+    logger.info('Checking for uncommitted changes to the GnuCash git repo.')
 
     if changed_str in stdout:
-        logging.warning('There are uncommitted changes in the GnuCash git repo.')
+        logger.warning('There are uncommitted changes in the GnuCash git repo.')
         return True
     else:
-        logging.info('There were no uncommitted changes to the GnuCash git repo.')
+        logger.info('There were no uncommitted changes to the GnuCash git repo.')
         return False
 
 
@@ -253,32 +271,32 @@ def git_ensure_discard_uncommitted(gnucash_dir, book_name):
 
     if uncommitted_changes:
         cmd = f'git -C "{gnucash_dir}" checkout "{book_name}"'
-        logging.info('Running `git checkout` to discard uncommitted changes')
-        logging.info(cmd)
+        logger.info('Running `git checkout` to discard uncommitted changes')
+        logger.info(cmd)
         run = run_shell_command(cmd)
 
         if run.returncode == 0:
-            logging.info(f'Successfully ran "{cmd}" to clear uncommitted changes')
+            logger.info(f'Successfully ran "{cmd}" to clear uncommitted changes')
         else:
-            logging.critical(f'Failed while running command {cmd} to clear changes:')
-            logging.critical(run)
+            logger.critical(f'Failed while running command {cmd} to clear changes:')
+            logger.critical(run)
             sys.exit(1)
 
 
 def git_pull(gnucash_dir):
     '''Run a `git pull` command in the directory with the GnuCash book.'''
     cmd = f'git -C {gnucash_dir} pull'
-    logging.info('Running `git pull` with the following command:')
-    logging.info(cmd)
+    logger.info('Running `git pull` with the following command:')
+    logger.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.info('successfully ran `git pull`')
+        logger.info('successfully ran `git pull`')
         return True
     else:
-        logging.critical('Failed to run a `git pull` command.\
+        logger.critical('Failed to run a `git pull` command.\
                 See below for command output')
-        logging.critical(run)
+        logger.critical(run)
         return False
 
 
@@ -286,50 +304,50 @@ def git_add(gnucash_dir, gnucash_book):
     '''Run `git add {gnucash_book}` in the context of the GnuCash book directory.
        `gnucash_dir` should be a fully qualified path to your GnuCash dir'''
     cmd = f'git -C "{gnucash_dir}" add "{gnucash_book}"'
-    logging.info('Running `git add` with the following command:')
-    logging.info(cmd)
+    logger.info('Running `git add` with the following command:')
+    logger.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.info(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
+        logger.info(f'Successfully ran `git add {gnucash_book}` in GnuCash directory')
         return True
     else:
-        logging.critical('Failed to run a `git add` command.\
+        logger.critical('Failed to run a `git add` command.\
                   See below for command output')
-        logging.critical(run)
+        logger.critical(run)
         return False
 
 
 def git_commit(gnucash_dir, message):
     '''Run `git commit -m "{message}"` in the context of the GnuCash dir'''
     cmd = f'git -C {gnucash_dir} commit -m "{message}"'
-    logging.info('Running `git commit` with the following command:')
-    logging.info(cmd)
+    logger.info('Running `git commit` with the following command:')
+    logger.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.info('Successfully ran the following git commit command:')
-        logging.info(cmd)
+        logger.info('Successfully ran the following git commit command:')
+        logger.info(cmd)
         return True
     else:
-        logging.error('Failed to run a `git commit` command.\
+        logger.error('Failed to run a `git commit` command.\
                   See below for command output')
-        logging.error(run)
+        logger.error(run)
         return False
 
 
 def git_push(gnucash_dir):
     '''Run a `git push` command in the context of the GnuCash directory'''
     cmd = f'git -C {gnucash_dir} push'
-    logging.info('Running `git push` with the following command:')
-    logging.info(cmd)
+    logger.info('Running `git push` with the following command:')
+    logger.info(cmd)
     run = run_shell_command(cmd)
 
     if run.returncode == 0:
-        logging.info('Successfully ran `git push`')
+        logger.info('Successfully ran `git push`')
         return True
     else:
-        logging.error('Failed to run `git push`.\
+        logger.error('Failed to run `git push`.\
                 See below for command output')
         print(run)
         return False
@@ -347,13 +365,13 @@ def git_add_commit_and_push(gnucash_dir, gnucash_book, commit_message):
                 return (True, None)
             else:
                 failure = 'Git add and commit succeeded, but pushing failed'
-                logging.critical(failure)
+                logger.critical(failure)
                 return (False, failure)
         else:
             failure = 'Git add succeeded, but commit failed. Did not try a push'
-            logging.critical(failure)
+            logger.critical(failure)
             return (False, failure)
     else:
         failure = 'Git add failed'
-        logging.critical(failure)
+        logger.critical(failure)
         return (False, failure)
