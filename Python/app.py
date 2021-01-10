@@ -10,7 +10,8 @@ from gnucash_helper import list_accounts,\
                            git_ensure_cloned,\
                            git_set_user_and_email,\
                            get_git_user_name_and_email_from_env,\
-                           git_ensure_discard_uncommitted
+                           git_ensure_discard_uncommitted,\
+                           logger
 
 from decimal import Decimal, ROUND_HALF_UP
 import logging
@@ -26,19 +27,6 @@ from wtforms import DecimalField,\
                     TextAreaField
 
 from wtforms.validators import DataRequired
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-ch.setFormatter(formatter)
-fh.setFormatter(formatter)
-logger.addHandler(ch)
-logger.addHandler(fh)
 
 
 class TransactionForm(FlaskForm):
