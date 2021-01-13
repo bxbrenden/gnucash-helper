@@ -24,7 +24,7 @@ cp Dockerfile.example Dockerfile
 ``` 
 
 Next, change the following variables:
-- `ENV GIT_USER` : Change "Dude Dudeman" to your name as you'd like it to appear in your git commits.
+- `ENV GIT_USER` : Change "Pers Person" to your name as you'd like it to appear in your git commits.
 - `ENV GIT_EMAIL` : Set your email address to the email you'd like to appear in your git commits.
 - `ENV GITHUB_TOKEN`: Set the value to a [GitHub Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token). This personal access token only needs `repo` access.
 - `ENV GITHUB_GNUCASH_URL`: Set this to the HTTPS URL of the GitHub repository containing your GnuCash file.

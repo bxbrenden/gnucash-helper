@@ -4,11 +4,11 @@ LABEL "maintainer"="brendenahyde@gmail.com"
 
 USER root
 
-ENV GIT_USER="Dude Dudeman"
-ENV GIT_EMAIL="dudedudeman@gmail.com"
+ENV GIT_USER="Pers Person"
+ENV GIT_EMAIL="persperson@gmail.com"
 ENV GITHUB_TOKEN="12345671324891asdjbfblkj27123"
-ENV GITHUB_GNUCASH_URL="https://github.com/dudedudeman/gnucash-budget.git"
-ENV CLONE_URL="https://12345671324891asdjbfblkj27123@github.com/dudedudeman/gnucash-budget.git"
+ENV GITHUB_GNUCASH_URL="https://github.com/persperson/gnucash-budget.git"
+ENV CLONE_URL="https://12345671324891asdjbfblkj27123@github.com/persperson/gnucash-budget.git"
 ENV GNUCASH_BOOK_NAME="gnucash-budget.gnucash"
 ENV GNUCASH_DIR="/gnucash-budget"
 
