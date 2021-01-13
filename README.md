@@ -39,7 +39,7 @@ You can build the container from the root directory of this project with the fol
 ```bash
 docker build -t bxbrenden/gnucash-helper:latest .
 ```
-Afterwards, the `bxbrenden/gnucash-helper:lates` docker container will appear in your `sudo docker images` output.
+Afterwards, the `bxbrenden/gnucash-helper:latest` docker container will appear in your `sudo docker images` output.
 
 ## Running the Docker Container
 Now that you have built the docker container, you can run it as follows:
