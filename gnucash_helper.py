@@ -125,6 +125,7 @@ def last_n_transactions(n, book):
         splits = trans.splits
         dest_acct = splits[0]
         source_acct = splits[1]
+        descrip = trans.description
         amount = dest_acct.value
         # make the amount positive for display's sake
         if amount.is_signed():
@@ -134,6 +135,7 @@ def last_n_transactions(n, book):
         t['date'] = date
         t['source'] = source_acct.account.fullname
         t['dest'] = dest_acct.account.fullname
+        t['description'] = descrip
         t['amount'] = f'${amount:.2f}'
         last_n.append(t)
 
