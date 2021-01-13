@@ -31,6 +31,7 @@ Next, change the following variables:
 - `ENV CLONE_URL`: you construct this string as follows: `https://` + `<your GitHub Personal Access Token>` + `@github.com/<your GitHub account>/<your GnuCash git repo>` + `.git`. For example, if your Personal Access Token is `12345`, your user account is `bxbrenden`, and your git repo is called `my-gnucash`, your `CLONE_URL` would be: `https://12345@github.com/bxbrenden/my-gnucash.git`
 - `ENV GNUCASH_BOOK_NAME`: This is the file name of your GnuCash file as it exists in your GitHub repository.
 - `ENV GNUCASH_DIR`: You can leave this set to its default value. This is the name of the directory your GnuCash GitHub repository will be cloned to in the docker container.
+- `ENV NUM_TRANSACTIONS`: The number of most recent transactions to display on the Transactions page
 
 ## Building the Docker Container
 Once everything is configured in the `Dockerfile`, the next step is to build the container.

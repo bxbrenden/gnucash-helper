@@ -11,6 +11,7 @@ ENV GITHUB_GNUCASH_URL="https://github.com/persperson/gnucash-budget.git"
 ENV CLONE_URL="https://12345671324891asdjbfblkj27123@github.com/persperson/gnucash-budget.git"
 ENV GNUCASH_BOOK_NAME="gnucash-budget.gnucash"
 ENV GNUCASH_DIR="/gnucash-budget"
+ENV NUM_TRANSACTIONS="50"
 
 RUN apt-get update
 RUN apt-get install -y git gnucash python3-pip

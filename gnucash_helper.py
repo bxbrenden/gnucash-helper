@@ -30,6 +30,17 @@ def configure_logging():
 logger = configure_logging()
 
 
+def get_env_var(name):
+    '''Get the environment variable `name` from environment variable.
+       Return the value of the `name` env var if found, None otherwise.'''
+    try:
+        env_var = env[name]
+    except KeyError as ke:
+        logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
+    else:
+        return env_var
+
+
 def get_book_name_from_env():
     '''Get the GnuCash book name from an environment variable'''
     try:
@@ -109,7 +120,7 @@ def add_account(book, new_acct_name, parent, currency='USD'):
         return False
 
 
-def last_n_transactions(n, book):
+def last_n_transactions(book, n=50):
     '''Return the last `n` transactions from the GnuCash book `book`.
        The transactions are returned as a dict where the items are:
            source: source account name
@@ -140,7 +151,6 @@ def last_n_transactions(n, book):
         last_n.append(t)
 
     return last_n
-
 
 
 def add_transaction(book, description, amount, debit_acct, credit_acct):

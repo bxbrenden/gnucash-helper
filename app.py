@@ -1,7 +1,6 @@
 from gnucash_helper import list_accounts,\
                            get_book_name_from_env,\
                            open_book,\
-                           get_account,\
                            add_transaction,\
                            get_gnucash_dir,\
                            git_pull,\
@@ -12,18 +11,18 @@ from gnucash_helper import list_accounts,\
                            get_git_user_name_and_email_from_env,\
                            git_ensure_discard_uncommitted,\
                            logger,\
-                           last_n_transactions
+                           last_n_transactions,\
+                           get_env_var
 
-from decimal import Decimal, ROUND_HALF_UP
-import logging
+from decimal import ROUND_HALF_UP
 from os import environ as env
+import sys
 
-from flask import Flask, render_template, session, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
                     SelectField,\
-                    StringField,\
                     SubmitField,\
                     TextAreaField
 
@@ -49,10 +48,10 @@ class TransactionForm(FlaskForm):
                          choices=accounts,
                          validate_choice=True)
     amount = DecimalField('Amount ($)',
-                        validators=[DataRequired('Do not include a dollar sign or a comma.')],
-                        places=2,
-                        rounding=ROUND_HALF_UP,
-                        render_kw={'placeholder': 'Ex: 4.20'})
+                          validators=[DataRequired('Do not include a dollar sign or a comma.')],
+                          places=2,
+                          rounding=ROUND_HALF_UP,
+                          render_kw={'placeholder': 'Ex: 4.20'})
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
@@ -114,10 +113,10 @@ def index():
 
         if added_txn:
             flash(f'Transaction for {float(amount):.2f} saved to GnuCash file.',
-                    'success')
+                  'success')
         else:
             flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
-                    'danger')
+                  'danger')
 
         git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
         if git_result:
@@ -139,9 +138,16 @@ def transactions():
     global path_to_book
     book = open_book(path_to_book)
 
-    transactions = last_n_transactions(10, book)
+    # determine the number of transactions to display based on env var
+    num_transactions = get_env_var('NUM_TRANSACTIONS')
+    if num_transactions is None:
+        transactions = last_n_transactions(book)
+    else:
+        transactions = last_n_transactions(book, n=num_transactions)
     book.close()
-    return render_template('transactions.html', transactions=transactions)
+    return render_template('transactions.html',
+                           transactions=transactions,
+                           n=num_transactions)
 
 
 @app.errorhandler(404)
