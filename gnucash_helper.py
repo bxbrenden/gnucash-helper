@@ -123,8 +123,8 @@ def last_n_transactions(n, book):
         t = {}
         date = str(trans.enter_date.date())
         splits = trans.splits
-        source_acct = splits[0]
-        dest_acct = splits[1]
+        dest_acct = splits[0]
+        source_acct = splits[1]
         amount = dest_acct.value
         # make the amount positive for display's sake
         if amount.is_signed():
