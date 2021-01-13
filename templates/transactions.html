@@ -10,14 +10,16 @@
     <thead>
       <th>Source Account</th>
       <th>Destination Account</th>
+      <th>Date</th>
       <th>Amount</th>
     </thead>
     <tbody>
       {% for trans in transactions %}
       <tr>
-	<td>{{ trans['source']  }}</td>
+	<td>{{ trans['source'] }}</td>
 	<td>{{ trans['dest'] }}</td>
-	<td>{{ float(trans['amount']):.2f }}</td>
+	<td>{{ trans['date'] }}</td>
+	<td>{{ trans['amount'] }}</td>
       </tr>
       {% endfor %}
     </tbody>

@@ -10,6 +10,7 @@ from piecash import Transaction, Split, GnucashException
 
 '''This is the helper library for the main web app'''
 
+
 def configure_logging():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -127,11 +128,12 @@ def last_n_transactions(n, book):
         # make the amount positive for display's sake
         if amount.is_signed():
             amount = -amount
+        amount = float(amount)
 
         last_n['date'] = date
         last_n['source'] = source_acct.account.fullname
         last_n['dest'] = dest_acct.account.fullname
-        last_n['amount'] = amount
+        last_n['amount'] = f'${amount:.2f}'
 
     return last_n
 
