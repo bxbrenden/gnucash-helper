@@ -1,39 +1,31 @@
 # GnuCash-Helper
 
 GnuCash-Helper is a small Flask app for entering GnuCash transactions from a web browser.
+It synchronizes the changes to a GnuCash file tracked in your GitHub account.
+
+## Requirements
+### Hosting
+It is recommended you run this program as a Docker container on a GNU/Linux-based distro behind an nginx reverse proxy.
+Therefore, you should install `nginx` and `docker`.
+Installation instructions for `nginx` and `docker` are beyond the scope of this readme.
+
+### GnuCash File Format
+GnuCash has several file formats available, including `sqlite3`, `postgresql`, and `xml`.
+This project can only work with GnuCash files saved in  `sqlite3` format.
+See the [official GnuCash page on formatting](https://www.gnucash.org/docs/v4/C/gnucash-guide/basics-files1.html) for instructions on saving your GnuCash file as `sqlite3`.
 
 
-# Requirements
-You will need `python 3.9` and `pip`.
+## Configuration
+All configuration is done in the Dockerfile.
 
-Use `pip install -r requirements.txt` to install the dependencies.
+Start by copying the [Dockerfile.example](https://github.com/bxbrenden/GnuCash-Helper/blob/main/Dockerfile.example) file to a new file called `Dockerfile`:
+```bash
+cp Dockerfile.example Dockerfile
+``` 
 
-
-# Configuration
-
-`gnucash_helper` needs several environment variables configured.
-It also requires a git repo that contains your `.gnucash` file.
-
-
-## Environment Variables
-- `GNUCASH_DIR`: the fully qualified path to the directory with your `.gnucash` file, e.g. `/home/brenden/budget`
-- `GNUCASH_BOOK_NAME`: the name of your `.gnucash` file, e.g. `budget.gnucash`
-- `FLASK_APP`: the name of the Flask application, e.g. `app.py`
-- `FLASK_SECRET_KEY`: a long, random string of chars for Flask CSRF protection
-
-
-## Git Repo
-This tool assumes you are keeping your `.gnucash` file up to date in a git repository.
-It also assumes that your `.gnucash` file is saved in the `sqlite3` format.
-
-**This will not work if your `.gnucash` file is in XML or PostgreSQL format**
-
-
-# Usage
-
-1. Clone this repository to your workstation / server.
-2. In a separate directory, clone your GnuCash repository.
-3. Run `pip3 install -r requirements.txt` to install the dependencies.
-4. Set the environment variables mentioned in the `Environment Variables` section of this readme file.
-5. Run the app with `flask run`. **Note: need to change this to gunicorn and add auth. for prod!** 
-6. Visit the URl of your running app, and add a transaction to test.
+Next, change the following variables:
+- `ENV GIT_USER` : Change "Dude Dudeman" to your name as you'd like it to appear in your git commits.
+- `ENV GIT_EMAIL` : Set your email address to the email you'd like to appear in your git commits.
+- `ENV GITHUB_TOKEN`: Set the value to a [GitHub Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token). This personal access token only needs `repo` access.
+- `ENV GITHUB_GNUCASH_URL`: Set this to the HTTPS URL of the GitHub repository containing your GnuCash file.
+- `ENV CLONE_URL`: you construct this string as follows: `https://` + `<your GitHub Personal Access Token>` + `@github.com/<your GitHub account>/<your GnuCash git repo>` + `.git`. For example, if your Personal Access Token is `12345`, your user account is `bxbrenden`, and your git repo is called `my-gnucash`, your `CLONE_URL` would be: `https://12345@github.com/bxbrenden/my-gnucash.git`
