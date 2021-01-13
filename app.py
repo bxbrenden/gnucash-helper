@@ -139,7 +139,7 @@ def transactions():
     book = open_book(path_to_book)
 
     # determine the number of transactions to display based on env var
-    num_transactions = get_env_var('NUM_TRANSACTIONS')
+    num_transactions = int(get_env_var('NUM_TRANSACTIONS'))
     if num_transactions is None:
         transactions = last_n_transactions(book)
     else:
