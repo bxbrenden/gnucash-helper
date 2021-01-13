@@ -15,9 +15,9 @@
     <tbody>
       {% for trans in transactions %}
       <tr>
-	<td>{{ trans.source  }}</td>
-	<td>{{ trans.dest }}</td>
-	<td>{{ trans.amount }}</td>
+	<td>{{ trans['source']  }}</td>
+	<td>{{ trans['dest'] }}</td>
+	<td>{{ float(trans['amount']):.2f }}</td>
       </tr>
       {% endfor %}
     </tbody>
