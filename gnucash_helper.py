@@ -8,6 +8,8 @@ import sys
 import piecash
 from piecash import Transaction, Split, GnucashException
 
+'''This is the helper library for the main web app'''
+
 def configure_logging():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
