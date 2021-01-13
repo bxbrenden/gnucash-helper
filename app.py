@@ -11,7 +11,7 @@ from gnucash_helper import list_accounts,\
                            git_set_user_and_email,\
                            get_git_user_name_and_email_from_env,\
                            git_ensure_discard_uncommitted,\
-                           logger,
+                           logger,\
                            last_n_transactions
 
 from decimal import Decimal, ROUND_HALF_UP
