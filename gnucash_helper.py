@@ -108,6 +108,35 @@ def add_account(book, new_acct_name, parent, currency='USD'):
         return False
 
 
+def last_n_transactions(n, book):
+    '''Return the last `n` transactions from the GnuCash book `book`.
+       The transactions are returned as a dict where the items are:
+           source: source account name
+           dest: destination account name
+           date: the enter date of the transaction (e.g. 2021-01-01)
+           amount: the amount of money'''
+    last_n = {}
+    transactions = book.transactions[-n:]
+
+    for trans in transactions:
+        date = str(trans.enter_date.date())
+        splits = trans.splits
+        source_acct = splits[0]
+        dest_acct = splits[1]
+        amount = dest_acct.value
+        # make the amount positive for display's sake
+        if amount.is_signed():
+            amount = -amount
+
+        last_n['date'] = date
+        last_n['source'] = source_acct.account.fullname
+        last_n['dest'] = dest_acct.account.fullname
+        last_n['amount'] = amount
+
+    return last_n
+
+
+
 def add_transaction(book, description, amount, debit_acct, credit_acct):
     '''Add a transaction to an existing book.
        `amount` should be a float out to 2 decimal places for the value of the transaction.
