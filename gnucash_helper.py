@@ -116,10 +116,11 @@ def last_n_transactions(n, book):
            dest: destination account name
            date: the enter date of the transaction (e.g. 2021-01-01)
            amount: the amount of money'''
-    last_n = {}
+    last_n = []
     transactions = book.transactions[-n:]
 
     for trans in transactions:
+        t = {}
         date = str(trans.enter_date.date())
         splits = trans.splits
         source_acct = splits[0]
@@ -130,10 +131,11 @@ def last_n_transactions(n, book):
             amount = -amount
         amount = float(amount)
 
-        last_n['date'] = date
-        last_n['source'] = source_acct.account.fullname
-        last_n['dest'] = dest_acct.account.fullname
-        last_n['amount'] = f'${amount:.2f}'
+        t['date'] = date
+        t['source'] = source_acct.account.fullname
+        t['dest'] = dest_acct.account.fullname
+        t['amount'] = f'${amount:.2f}'
+        last_n.append(t)
 
     return last_n
 
