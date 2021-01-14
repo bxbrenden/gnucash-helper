@@ -128,7 +128,7 @@ def last_n_transactions(book, n=50):
            date: the enter date of the transaction (e.g. 2021-01-01)
            amount: the amount of money'''
     last_n = []
-    transactions = reversed(book.transactions[-n:])
+    transactions = [x for x in reversed(book.transactions[-n:])]
     logger.debug(f'`n` was set to {n} for getting last transactions')
     logger.debug(f'There are {len(transactions)} transactions in the list')
 
