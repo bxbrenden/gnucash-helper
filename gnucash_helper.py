@@ -140,11 +140,10 @@ def last_n_transactions(book, n=50):
         logger.debug('The splits are:')
         for split in splits:
             logger.debug(split)
-        try:
-            assert len(splits) == 2
-        except AssertionError:
-            logger.error(f'The length of splits was not 2 for transaction #{ind}')
-            sys.exit(1)
+        if len(splits) != 2:
+            logger.error(f'The length of splits was not 2 for transaction #{ind}. Skipping.')
+            continue
+
         dest_acct = splits[0]
         source_acct = splits[1]
         descrip = trans.description
