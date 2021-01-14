@@ -129,11 +129,22 @@ def last_n_transactions(book, n=50):
            amount: the amount of money'''
     last_n = []
     transactions = reversed(book.transactions[-n:])
+    logger.debug(f'`n` was set to {n} for getting last transactions')
+    logger.debug(f'There are {len(transactions)} transactions in the list')
 
-    for trans in transactions:
+    for ind, trans in enumerate(transactions):
         t = {}
         date = str(trans.enter_date.date())
         splits = trans.splits
+        logger.debug(f'Txn #{ind}: the length of `splits` is: {len(splits)}')
+        logger.debug('The splits are:')
+        for split in splits:
+            logger.debug(split)
+        try:
+            assert len(splits) == 2
+        except AssertionError:
+            logger.error(f'The length of splits was not 2 for transaction #{ind}')
+            sys.exit(1)
         dest_acct = splits[0]
         source_acct = splits[1]
         descrip = trans.description
