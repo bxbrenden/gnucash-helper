@@ -6,3 +6,11 @@ body, html {
 .alert-success {
   background-color: #18ecff;
 }
+
+tr.evenrow {
+  background-color: #ffffff;
+}
+
+tr.oddrow {
+  background-color: #222222;
+}

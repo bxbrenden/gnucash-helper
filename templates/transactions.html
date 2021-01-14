@@ -16,8 +16,12 @@
       <th>Amount</th>
     </thead>
     <tbody>
-      {% for trans in transactions %}
-      <tr>
+      {% for ind, trans in enumerate(transactions) %}
+      {% if ind % 2 == 0 %}
+      <tr class="evenrow">
+      {% else %}
+      <tr class="oddrow">
+      {% endif %}
 	<td>{{ trans['source'] }}</td>
 	<td>{{ trans['dest'] }}</td>
 	<td>{{ trans['date'] }}</td>
