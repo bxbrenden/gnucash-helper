@@ -1,6 +1,6 @@
 body, html {
   background: rgb(2,0,36);
-  background: linear-gradient(167deg, rgba(2,0,36,1) 0%, rgba(255,161,56,1) 0%, rgba(255,123,202,1) 100%); 
+  background: linear-gradient(306deg, rgba(2,0,36,1) 0%, rgba(62,116,255,1) 0%, rgba(153,238,255,1) 39%, rgba(229,249,160,1) 41%, rgba(255,253,127,1) 74%, rgba(255,140,199,1) 79%, rgba(255,140,199,1) 100%);
 }
 
 .alert-success {
