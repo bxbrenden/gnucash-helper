@@ -146,8 +146,6 @@ def transactions():
         transactions = last_n_transactions(book, n=num_transactions)
     book.close()
 
-    # Reverse the transactions so newest is on top like a mobile banking app
-    transactions = reversed(transactions)
     return render_template('transactions.html',
                            transactions=transactions,
                            n=num_transactions)
