@@ -1,7 +1,6 @@
 body, html {
   background: rgb(134,62,255);
   background: linear-gradient(90deg, rgba(134,62,255,1) 0%, rgba(255,255,255,1) 52%); 
-  background-repeat: no-repeat;
 }
 
 .alert-success {

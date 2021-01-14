@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}Transaction History{% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='transactions.css')  }}">
+{% endblock %}
 {% block page_content %}
 <div class="page-header">
   <h1>Transaction History</h1>
