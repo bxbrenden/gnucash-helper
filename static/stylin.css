@@ -6,3 +6,8 @@ body, html {
 .alert-success {
   background-color: #18ecff;
 }
+
+.container {
+  width: 100%;
+  white-space: nowrap;
+}
