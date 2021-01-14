@@ -1,7 +1,6 @@
 from gnucash_helper import list_accounts,\
                            get_book_name_from_env,\
                            open_book,\
-                           get_account,\
                            add_transaction,\
                            get_gnucash_dir,\
                            git_pull,\
@@ -11,28 +10,33 @@ from gnucash_helper import list_accounts,\
                            git_set_user_and_email,\
                            get_git_user_name_and_email_from_env,\
                            git_ensure_discard_uncommitted,\
-                           logger
+                           logger,\
+                           last_n_transactions,\
+                           get_env_var
 
-from decimal import Decimal, ROUND_HALF_UP
-import logging
+from decimal import ROUND_HALF_UP
 from os import environ as env
+import sys
 
-from flask import Flask, render_template, session, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
                     SelectField,\
-                    StringField,\
                     SubmitField,\
                     TextAreaField
 
 from wtforms.validators import DataRequired
 
+book_name = get_book_name_from_env()
+gnucash_dir = get_gnucash_dir()
+path_to_book = gnucash_dir + '/' + book_name
+
 
 class TransactionForm(FlaskForm):
-    book_name = get_book_name_from_env()
-    gnucash_dir = get_gnucash_dir()
-    path_to_book = gnucash_dir + '/' + book_name
+    global book_name
+    global gnucash_dir
+    global path_to_book
     accounts = list_accounts(path_to_book)
 
     debit = SelectField('From Account (Debit)',
@@ -44,10 +48,10 @@ class TransactionForm(FlaskForm):
                          choices=accounts,
                          validate_choice=True)
     amount = DecimalField('Amount ($)',
-                        validators=[DataRequired('Do not include a dollar sign or a comma.')],
-                        places=2,
-                        rounding=ROUND_HALF_UP,
-                        render_kw={'placeholder': 'Ex: 4.20'})
+                          validators=[DataRequired('Do not include a dollar sign or a comma.')],
+                          places=2,
+                          rounding=ROUND_HALF_UP,
+                          render_kw={'placeholder': 'Ex: 4.20'})
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
@@ -64,7 +68,7 @@ def configure_git():
        personal access token, repo URL, and ensuring the repo has
        already been cloned (clone should already be done by docker).'''
     global logger
-    gnucash_dir = get_gnucash_dir()
+    global gnucash_dir
     gh_token, gh_url = get_github_token_and_url_from_env()
     git_user, git_email = get_git_user_name_and_email_from_env()
     git_configured = git_set_user_and_email(git_user, git_email)
@@ -83,9 +87,9 @@ def configure_git():
 def git_ensure_good_state():
     '''Ensure that any uncommitted changes are discarded, and do a `git pull`.'''
     global logger
+    global book_name
+    global gnucash_dir
     logger.info('Running pre-request git cleanup commands')
-    gnucash_dir = get_gnucash_dir()
-    book_name = get_book_name_from_env()
     git_ensure_discard_uncommitted(gnucash_dir, book_name)
     git_pull(gnucash_dir)
 
@@ -93,12 +97,12 @@ def git_ensure_good_state():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global logger
+    global book_name
+    global gnucash_dir
+    global path_to_book
     form = TransactionForm()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
-        book_name = get_book_name_from_env()
-        gnucash_dir = get_gnucash_dir()
-        path_to_book = gnucash_dir + '/' + book_name
         gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
@@ -109,10 +113,10 @@ def index():
 
         if added_txn:
             flash(f'Transaction for {float(amount):.2f} saved to GnuCash file.',
-                    'success')
+                  'success')
         else:
             flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
-                    'danger')
+                  'danger')
 
         git_result, git_output = git_add_commit_and_push(gnucash_dir, book_name, descrip)
         if git_result:
@@ -127,6 +131,23 @@ def index():
             logger.critical(git_result)
         return redirect(url_for('index'))
     return render_template('index.html', form=form)
+
+
+@app.route('/transactions')
+def transactions():
+    global path_to_book
+    book = open_book(path_to_book)
+
+    # determine the number of transactions to display based on env var
+    num_transactions = int(get_env_var('NUM_TRANSACTIONS'))
+    if num_transactions is None:
+        transactions = last_n_transactions(book)
+    else:
+        transactions = last_n_transactions(book, n=num_transactions)
+    book.close()
+    return render_template('transactions.html',
+                           transactions=transactions,
+                           n=num_transactions)
 
 
 @app.errorhandler(404)

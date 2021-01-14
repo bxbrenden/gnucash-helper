@@ -10,6 +10,7 @@ from piecash import Transaction, Split, GnucashException
 
 '''This is the helper library for the main web app'''
 
+
 def configure_logging():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -27,6 +28,17 @@ def configure_logging():
 
 
 logger = configure_logging()
+
+
+def get_env_var(name):
+    '''Get the environment variable `name` from environment variable.
+       Return the value of the `name` env var if found, None otherwise.'''
+    try:
+        env_var = env[name]
+    except KeyError as ke:
+        logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
+    else:
+        return env_var
 
 
 def get_book_name_from_env():
@@ -106,6 +118,39 @@ def add_account(book, new_acct_name, parent, currency='USD'):
     else:
         logger.error(f'There was no parent account named "{parent}" or no commodity named "USD"')
         return False
+
+
+def last_n_transactions(book, n=50):
+    '''Return the last `n` transactions from the GnuCash book `book`.
+       The transactions are returned as a dict where the items are:
+           source: source account name
+           dest: destination account name
+           date: the enter date of the transaction (e.g. 2021-01-01)
+           amount: the amount of money'''
+    last_n = []
+    transactions = book.transactions[-n:]
+
+    for trans in transactions:
+        t = {}
+        date = str(trans.enter_date.date())
+        splits = trans.splits
+        dest_acct = splits[0]
+        source_acct = splits[1]
+        descrip = trans.description
+        amount = dest_acct.value
+        # make the amount positive for display's sake
+        if amount.is_signed():
+            amount = -amount
+        amount = float(amount)
+
+        t['date'] = date
+        t['source'] = source_acct.account.fullname
+        t['dest'] = dest_acct.account.fullname
+        t['description'] = descrip
+        t['amount'] = f'${amount:.2f}'
+        last_n.append(t)
+
+    return last_n
 
 
 def add_transaction(book, description, amount, debit_acct, credit_acct):
