@@ -144,15 +144,13 @@ def last_n_transactions(book, n=50):
             logger.error(f'The length of splits was not 2 for transaction #{ind}. Skipping.')
             continue
 
-        # dest_acct = splits[0]
-        # source_acct = splits[1]
         # figure out which split contains the debit acct in the transaction
         if splits[0].is_debit:
-            source_acct = splits[0]
-            dest_acct = splits[1]
-        else:
             source_acct = splits[1]
             dest_acct = splits[0]
+        else:
+            source_acct = splits[0]
+            dest_acct = splits[1]
 
         descrip = trans.description
         amount = dest_acct.value
