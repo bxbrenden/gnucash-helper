@@ -2,6 +2,10 @@ html, body {
   background-color: #ccc4c4;
 }
 
+th {
+  background-color: #94b484;
+}
+
 tr.evenrow {
   background-color: #f4fcdc;
 }
