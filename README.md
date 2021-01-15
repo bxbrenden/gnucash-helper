@@ -56,4 +56,4 @@ sudo docker logs --follow <container_ID>
 ```
 
 ## License
-This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md]() or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.
+This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md](https://github.com/bxbrenden/GnuCash-Helper/blob/main/LICENSE.md) or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.
