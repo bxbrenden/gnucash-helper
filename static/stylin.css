@@ -1,16 +1,15 @@
-body, html {
-  background: rgb(134,62,255);
-  background: linear-gradient(90deg, rgba(134,62,255,1) 0%, rgba(255,255,255,1) 52%); 
+html, body {
+  background-color: #fcfcfc;
 }
 
-.alert-success {
-  background-color: #18ecff;
+th {
+  background-color: #94b484;
 }
 
 tr.evenrow {
-  background-color: #ffffff;
+  background-color: #f4fcdc;
 }
 
 tr.oddrow {
-  background-color: #dddddd;
+  background-color: #bcdcbc;
 }
