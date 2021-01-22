@@ -2,6 +2,10 @@ td.gcbal {
   text-align: right;
 }
 
+td.gcname {
+  max-width: 25%;
+}
+
 body, html {
   background-repeat: no-repeat;
 }
