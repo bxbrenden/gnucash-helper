@@ -1,3 +1,7 @@
+td {
+  text-align: right;
+}
+
 body, html {
   background-repeat: no-repeat;
 }

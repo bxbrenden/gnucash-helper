@@ -160,7 +160,7 @@ def balances():
         account = {}
         fn = acc.fullname
         bal = acc.get_balance()
-        bal = f'${bal:>10,.2f}'
+        bal = f'${bal:,.2f}'
         account['fullname'] = fn
         account['balance'] = bal
         accounts.append(account)
