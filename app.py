@@ -158,7 +158,7 @@ def balances():
     accounts = []
     for acc in book.accounts:
         account = {}
-        fn = acc.fullname
+        fn = acc.fullname.replace(':', ' ➥ ')
         bal = acc.get_balance()
         bal = f'${bal:,.2f}'
         account['fullname'] = fn
