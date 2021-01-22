@@ -1,9 +1,10 @@
-td.gcbal {
-  text-align: right;
+.table {
+  margin: auto;
+  max-width: 50%;
 }
 
-td.gcname {
-  max-width: 25%;
+td.gcbal {
+  text-align: right;
 }
 
 body, html {
