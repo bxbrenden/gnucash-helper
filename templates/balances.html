@@ -23,8 +23,8 @@
       {% else %}
       <tr class="oddrow">
       {% endif %}
-	<td>{{ acct['fullname'] }}</td>
-	<td>{{ acct['balance'] }}</td>
+        <td class="gcname">{{ acct['fullname'] }}</td>
+	<td class="gcbal">{{ acct['balance'] }}</td>
       </tr>
       {% endfor %}
     </tbody>
