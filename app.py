@@ -164,6 +164,7 @@ def balances():
         account['fullname'] = fn
         account['balance'] = bal
         accounts.append(account)
+    accounts = sorted(accounts, key=lambda x: x['fullname'])
     book.close()
 
     return render_template('balances.html',
