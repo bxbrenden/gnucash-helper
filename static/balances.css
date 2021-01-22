@@ -1,16 +1,9 @@
-@media only screen 
-    and (width : 414px) 
-    and (height : 736px) 
-    and (-webkit-device-pixel-ratio : 3) { 
-        .table {
-	  margin: auto;
-	  max-width: 100%;
-	}
-}
-
-.table {
-  margin: auto;
-  max-width: 50%;
+@media only screen
+    and (min-width: 1000px) {
+    .table {
+      margin: auto;
+      max-width: 50%;
+    }
 }
 
 td.gcbal {
