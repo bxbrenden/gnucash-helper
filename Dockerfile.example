@@ -16,8 +16,6 @@ ENV NUM_TRANSACTIONS="50"
 RUN apt-get update
 RUN apt-get install -y git gnucash python3-pip
 
-RUN ["/bin/bash", "-c", "git clone $CLONE_URL"]
-
 RUN mkdir /GnuCash-Helper
 WORKDIR /GnuCash-Helper
 ADD requirements.txt requirements.txt
@@ -26,6 +24,10 @@ ADD app.py app.py
 COPY templates/ templates/
 COPY static/ static/
 
+WORKDIR /
+RUN ["/bin/bash", "-c", "git clone $CLONE_URL"]
+
+WORKDIR/GnuCash-Helper
 RUN pip3 install -r requirements.txt
 EXPOSE 8000
 
