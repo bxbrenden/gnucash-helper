@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Balances{% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='balances.css')  }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1>Balances</h1>
+  <h2>Account Balances</h2>
+</div>
+<div>
+  <table class="table">
+    <thead>
+      <th>Account Name</th>
+      <th>Balance</th>
+    </thead>
+    <tbody>
+      {% for acct in accounts %}
+      {% if loop.index0 % 2 == 0 %}
+      <tr class="evenrow">
+      {% else %}
+      <tr class="oddrow">
+      {% endif %}
+	<td>{{acct['fullname'}}</td>
+	<td>{{ trans['balance'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
