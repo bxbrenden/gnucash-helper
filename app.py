@@ -155,12 +155,15 @@ def transactions():
 def balances():
     global path_to_book
     book = open_book(path_to_book, readonly=True)
-    accounts = {}
+    accounts = []
     for acc in book.accounts:
+        account = {}
         fn = acc.fullname
         bal = acc.get_balance()
         bal = f'{bal:.2f}'
-        accounts[fn] = bal
+        account['fullname'] = fn
+        account['balance'] = bal
+        accounts.append(account)
     book.close()
 
     return render_template('balances.html',
