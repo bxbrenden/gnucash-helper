@@ -151,6 +151,26 @@ def transactions():
                            n=num_transactions)
 
 
+@app.route('/balances')
+def balances():
+    global path_to_book
+    book = open_book(path_to_book, readonly=True)
+    accounts = []
+    for acc in book.accounts:
+        account = {}
+        fn = acc.fullname.replace(':', ' ➔ ')
+        bal = acc.get_balance()
+        bal = f'${bal:,.2f}'
+        account['fullname'] = fn
+        account['balance'] = bal
+        accounts.append(account)
+    accounts = sorted(accounts, key=lambda x: x['fullname'])
+    book.close()
+
+    return render_template('balances.html',
+                           accounts=accounts)
+
+
 @app.errorhandler(404)
 def page_nout_found(e):
     return render_template('404.html')

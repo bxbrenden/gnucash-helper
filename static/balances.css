@@ -1,0 +1,15 @@
+@media only screen
+    and (min-width: 1000px) {
+    .table {
+      margin: auto;
+      max-width: 50%;
+    }
+}
+
+td.gcbal {
+  text-align: right;
+}
+
+body, html {
+  background-repeat: no-repeat;
+}
