@@ -43,7 +43,7 @@ def get_env_var(name):
 def get_book_name_from_env():
     """Get the GnuCash book name from an environment variable."""
     try:
-        book_name = env['GNUCASH_BOOK_NAME']
+        book_name = env['GNUCASH_FILE']
     except KeyError as ke:
         logger.critical(f'Could not get GnuCash book name from env. var. {ke}.')
         sys.exit(1)

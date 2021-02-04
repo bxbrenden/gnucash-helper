@@ -21,7 +21,7 @@ ENV GNUCASH_DIR=/gnucash
 RUN mkdir $GNUCASH_DIR
 
 # This is the name of your GnuCash file
-ENV GNUCASH_BOOK_NAME=firebudget-sqlite3.gnucash
+ENV GNUCASH_FILE=firebudget-sqlite3.gnucash
 
 # Number of transactions that will be visible in txn history
 ENV NUM_TRANSACTIONS="200"
