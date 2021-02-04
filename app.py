@@ -53,7 +53,6 @@ class TransactionForm(FlaskForm):
         txn_form = cls()
         txn_form.debit.choices = accounts
         txn_form.credit.choices = accounts
-        book_read.close()
 
         return txn_form
 
