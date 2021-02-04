@@ -49,8 +49,7 @@ class TransactionForm(FlaskForm):
         global path_to_book
         global logger
         logger.info('Attempting to read GnuCash book to create TransactionForm.')
-        book_read = open_book(path_to_book, readonly=True)
-        accounts = list_accounts(book_read)
+        accounts = list_accounts(path_to_book)
         txn_form = cls()
         txn_form.debit.choices = accounts
         txn_form.credit.choices = accounts
