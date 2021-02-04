@@ -20,9 +20,15 @@ You can download the latest docker image of GnuCash Helper by running the follow
 docker pull bxbrenden/gnucash-helper:latest
 ```
 
+## Running the Docker Container
+Example run:
+```bash
+docker run -e "GNUCASH_FILE=your_gnucash_file.gnucash" --restart unless-stopped -d -p 8000:8000 -v "$(pwd)/Sync":/gnucash bxbrenden/gnucash-helper:latest
+```
+
 ## Configuration
 There are only a few variable to configure, and they are all set in the `Dockerfile`:
-- `ENV GNUCASH_BOOK_NAME`: This is the file name of your GnuCash file as it exists on your server.
+- `ENV GNUCASH_FILE`: This is the file name of your GnuCash file as it exists on your server.
 - `ENV GNUCASH_DIR`: You can leave this set to its default value. This is the name of the directory your GnuCash GitHub repository will be cloned to in the docker container.
 - `ENV NUM_TRANSACTIONS`: The number of most recent transactions to display on the `Transactions` page
 
