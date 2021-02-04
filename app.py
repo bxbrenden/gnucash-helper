@@ -4,9 +4,11 @@ from gnucash_helper import list_accounts,\
                            add_transaction,\
                            get_gnucash_dir,\
                            last_n_transactions,\
-                           get_env_var
+                           get_env_var,\
+                           logger
 
 from decimal import ROUND_HALF_UP
+import os
 from os import environ as env
 
 from flask import Flask, render_template, redirect, url_for, flash
@@ -22,6 +24,8 @@ from wtforms.validators import DataRequired
 book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
 path_to_book = gnucash_dir + '/' + book_name
+book_exists = os.path.exists(path_to_book)
+logger.info(f'At the global start, the book\'s existence is: {book_exists}')
 
 
 class TransactionForm(FlaskForm):
@@ -43,6 +47,8 @@ class TransactionForm(FlaskForm):
     def new(cls):
         """Instantiate a new TransactionForm."""
         global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create TransactionForm.')
         book_read = open_book(path_to_book, readonly=True)
         accounts = list_accounts(book_read)
         txn_form = cls()
@@ -61,9 +67,12 @@ bootstrap = Bootstrap(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global logger
+    logger.info('Creating new form inside of the index route')
     form = TransactionForm.new()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
+        logger.info('Attempting to open book in index route')
         gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
@@ -86,6 +95,8 @@ def index():
 @app.route('/transactions')
 def transactions():
     global path_to_book
+    global logger
+    logger.info('Attempting to open book inside transactions route')
     book = open_book(path_to_book)
 
     # determine the number of transactions to display based on env var
@@ -104,6 +115,8 @@ def transactions():
 @app.route('/balances')
 def balances():
     global path_to_book
+    global logger
+    logger.info('Attempting to open book inside of balances route.')
     book = open_book(path_to_book, readonly=True)
     accounts = []
     for acc in book.accounts:
