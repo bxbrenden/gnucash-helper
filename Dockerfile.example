@@ -3,19 +3,10 @@ FROM python:3.9.1-buster
 LABEL "maintainer"="brendenahyde@gmail.com"
 
 USER root
-
-ENV GIT_USER="Pers Person"
-ENV GIT_EMAIL="persperson@gmail.com"
-ENV GITHUB_TOKEN="12345671324891asdjbfblkj27123"
-ENV GITHUB_GNUCASH_URL="https://github.com/persperson/gnucash-budget.git"
-ENV CLONE_URL="https://12345671324891asdjbfblkj27123@github.com/persperson/gnucash-budget.git"
-ENV GNUCASH_BOOK_NAME="gnucash-budget.gnucash"
-ENV GNUCASH_DIR="/gnucash-budget"
-ENV NUM_TRANSACTIONS="50"
-
 RUN apt-get update
-RUN apt-get install -y git gnucash python3-pip
+RUN apt-get install -y git gnucash python3-pip vim
 
+# Install app and dependencies
 RUN mkdir /GnuCash-Helper
 WORKDIR /GnuCash-Helper
 ADD requirements.txt requirements.txt
@@ -23,12 +14,18 @@ ADD gnucash_helper.py gnucash_helper.py
 ADD app.py app.py
 COPY templates/ templates/
 COPY static/ static/
-
-WORKDIR /
-RUN ["/bin/bash", "-c", "git clone $CLONE_URL"]
-
-WORKDIR /GnuCash-Helper
 RUN pip3 install -r requirements.txt
+
+# Make the dir where your GnuCash file will live inside the container
+ENV GNUCASH_DIR=/gnucash
+RUN mkdir $GNUCASH_DIR
+
+# This is the name of your GnuCash file
+ENV GNUCASH_BOOK_NAME=firebudget-sqlite3.gnucash
+
+# Number of transactions that will be visible in txn history
+ENV NUM_TRANSACTIONS="200"
+
 EXPOSE 8000
 
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/dev/shm", "app:app"]
