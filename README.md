@@ -1,7 +1,8 @@
 # GnuCash-Helper
 
-GnuCash-Helper is a small Flask app for entering GnuCash transactions from a web browser.
-Once configured in the _real_ GnuCash, it can be used as a standalone tool or with [Syncthing](https://syncthing.net/).
+GnuCash-Helper is a small Flask app for entering and viewing GnuCash transactions and account balances from a web browser.
+Once your GnuCash file is configured in the _real_ GnuCash, GnuCash Helper can be run as a standalone tool for simple budgeting.
+You can use [Syncthing](https://syncthing.net/) to ensure that your GnuCash file is synchronized from your server to your other devices.
 
 ## Requirements
 ### Hosting
