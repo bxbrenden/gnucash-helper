@@ -3,8 +3,6 @@
 *.gnucash
 *.log
 *.swp
-Python/__pycache__/
-Python/*.gnucash
-Python/cleanup
-Python/*.swp
-Python/Dockerfile
+__pycache__/
+*.gnucash
+*.swp

@@ -1,11 +1,11 @@
 # GnuCash-Helper
 
 GnuCash-Helper is a small Flask app for entering GnuCash transactions from a web browser.
-It synchronizes the changes to a GnuCash file tracked in your GitHub account.
+Once configured in the _real_ GnuCash, it can be used as a standalone tool or with [Syncthing](https://syncthing.net/).
 
 ## Requirements
 ### Hosting
-It is recommended you run this program as a Docker container on a GNU/Linux-based distro behind an nginx reverse proxy.
+It is recommended you run this program as a Docker container on port 8000 on a GNU/Linux-based distro behind an nginx reverse proxy with TLS.
 Therefore, you should install `nginx` and `docker`.
 Installation instructions for `nginx` and `docker` are beyond the scope of this readme.
 
@@ -14,24 +14,28 @@ GnuCash has several file formats available, including `sqlite3`, `postgresql`, a
 This project can only work with GnuCash files saved in  `sqlite3` format.
 See the [official GnuCash page on formatting](https://www.gnucash.org/docs/v4/C/gnucash-guide/basics-files1.html) for instructions on saving your GnuCash file as `sqlite3`.
 
+## Installation
+You can download the latest docker image of GnuCash Helper by running the following command from your \*nix terminal:
+```bash
+docker pull bxbrenden/gnucash-helper:latest
+```
+
+## Running the Docker Container
+This example run assumes that your environment meets these criteria:
+- You have `syncthing` installed and running
+- `syncthing` is using a directory called `Sync` in your home directory
+- The `Sync` directory in your home directory contains a file called `your_gnucash_file.gnucash`
+
+Example run:
+```bash
+docker run -e "GNUCASH_FILE=your_gnucash_file.gnucash" --restart unless-stopped -d -p 8000:8000 -v "$(pwd)/Sync":/gnucash bxbrenden/gnucash-helper:latest
+```
 
 ## Configuration
-All configuration is done in the Dockerfile.
-
-Start by copying the [Dockerfile.example](https://github.com/bxbrenden/GnuCash-Helper/blob/main/Dockerfile.example) file to a new file called `Dockerfile`:
-```bash
-cp Dockerfile.example Dockerfile
-``` 
-
-Next, change the following variables:
-- `ENV GIT_USER` : Change "Pers Person" to your name as you'd like it to appear in your git commits.
-- `ENV GIT_EMAIL` : Set your email address to the email you'd like to appear in your git commits.
-- `ENV GITHUB_TOKEN`: Set the value to a [GitHub Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token). This personal access token only needs `repo` access.
-- `ENV GITHUB_GNUCASH_URL`: Set this to the HTTPS URL of the GitHub repository containing your GnuCash file.
-- `ENV CLONE_URL`: you construct this string as follows: `https://` + `<your GitHub Personal Access Token>` + `@github.com/<your GitHub account>/<your GnuCash git repo>` + `.git`. For example, if your Personal Access Token is `12345`, your user account is `bxbrenden`, and your git repo is called `my-gnucash`, your `CLONE_URL` would be: `https://12345@github.com/bxbrenden/my-gnucash.git`
-- `ENV GNUCASH_BOOK_NAME`: This is the file name of your GnuCash file as it exists in your GitHub repository.
+There are only a few variable to configure, and they are all set in the `Dockerfile`:
+- `ENV GNUCASH_FILE`: This is the file name of your GnuCash file as it exists on your server.
 - `ENV GNUCASH_DIR`: You can leave this set to its default value. This is the name of the directory your GnuCash GitHub repository will be cloned to in the docker container.
-- `ENV NUM_TRANSACTIONS`: The number of most recent transactions to display on the Transactions page
+- `ENV NUM_TRANSACTIONS`: The number of most recent transactions to display on the `Transactions` page
 
 ## Building the Docker Container
 Once everything is configured in the `Dockerfile`, the next step is to build the container.
@@ -47,7 +51,7 @@ Now that you have built the docker container, you can run it as follows:
 1. Find the tag (it will be `latest` if you followed the previous section's instructions) for your docker container.
 2. Using that tag, run the following command:
 ```bash
-sudo docker run -d -p 8000:8000 bxbrenden/gnucash-helper:latest
+sudo docker run --reset unless-stopped -d -p 8000:8000 -v /path/to/Syncthing/folder bxbrenden/gnucash-helper:latest
 ```
 3. If successfully started, docker will print a long string to `STDOUT` (your terminal) representing the ID of your running container.
 4. To ensure the container is running properly, you can run:
