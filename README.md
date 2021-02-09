@@ -21,6 +21,11 @@ docker pull bxbrenden/gnucash-helper:latest
 ```
 
 ## Running the Docker Container
+This example run assumes that your environment meets these criteria:
+- You have `syncthing` installed and running
+- `syncthing` is using a directory called `Sync` in your home directory
+- The `Sync` directory in your home directory contains a file called `your_gnucash_file.gnucash`
+
 Example run:
 ```bash
 docker run -e "GNUCASH_FILE=your_gnucash_file.gnucash" --restart unless-stopped -d -p 8000:8000 -v "$(pwd)/Sync":/gnucash bxbrenden/gnucash-helper:latest
