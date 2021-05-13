@@ -2,5 +2,5 @@ Flask==1.1.2
 Flask-Bootstrap==3.3.7.1
 Flask-WTF==0.14.3
 ipython==7.19.0
-piecash==1.1.2
+piecash==1.1.7
 gunicorn==20.0.4

@@ -1,10 +1,8 @@
-FROM python:3.9.1-buster
+FROM bxbrenden/docker-ide:latest
 
 LABEL "maintainer"="brendenahyde@gmail.com"
 
 USER root
-RUN apt-get update
-RUN apt-get install -y git gnucash python3-pip vim
 
 # Install app and dependencies
 RUN mkdir /GnuCash-Helper
