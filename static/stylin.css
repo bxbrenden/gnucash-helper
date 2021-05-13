@@ -1,15 +1,15 @@
 html, body {
-  background-color: #fcfcfc;
+  background-color: #83e0ff;
 }
 
 th {
-  background-color: #94b484;
+  background-color: #ff8635;
 }
 
 tr.evenrow {
-  background-color: #f4fcdc;
+  background-color: #ffb767;
 }
 
 tr.oddrow {
-  background-color: #bcdcbc;
+  background-color: #ffffff;
 }
