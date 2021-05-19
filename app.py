@@ -63,14 +63,22 @@ app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
 bootstrap = Bootstrap(app)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
     global logger
-    logger.info('Creating new form inside of the index route')
+    logger.info('Rendering the index page')
+
+    return render_template('index.html')
+
+
+@app.route('/entry', methods=['GET', 'POST'])
+def entry():
+    global logger
+    logger.info('Creating new form inside of the entry route')
     form = TransactionForm.new()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
-        logger.info('Attempting to open book in index route')
+        logger.info('Attempting to open book in entry route')
         gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
@@ -86,8 +94,8 @@ def index():
             flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
                   'danger')
 
-        return redirect(url_for('index'))
-    return render_template('index.html', form=form)
+        return redirect(url_for('entry'))
+    return render_template('entry.html', form=form)
 
 
 @app.route('/transactions')

@@ -2,8 +2,9 @@
 {% block head %}
 {{ super() }}
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='CheckYour-Finance-logo-180x180.png') }}">
 {% endblock %}
-{% block title %}GnuCash Helper{% endblock %}
+{% block title %}CheckYour Finance{% endblock %}
 {% block navbar %}
   <div class="navbar navbar-inverse" role="navigation">
     <div class="container">
@@ -14,11 +15,11 @@
 	  <span class="icon-bar"></span>
 	  <span class="icon-bar"></span>
 	</button>
-	<a class="navbar-brand" href="/">NormalFlip</a>
+	<a class="navbar-brand" href="/entry">CheckYour Finance</a>
       </div>
       <div class="navbar-collapse collapse">
 	      <ul class="nav navbar-nav">
-	        <li><a href="/">Make Entry</a></li>
+	        <li><a href="/entry">Make Entry</a></li>
 		<li><a href="/transactions">Transaction History</a></li>
 		<li><a href="/balances">Balances</a></li>
 	      </ul>
