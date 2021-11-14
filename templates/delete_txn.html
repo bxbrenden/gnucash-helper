@@ -1,43 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Delete Transaction{% endblock %}
-{% block styles %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='transactions.css')  }}">
-{% endblock %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} CheckYour Finance  {% endblock %}
 {% block page_content %}
 <div class="page-header">
-  <h1>Delete Transaction</h1>
-  <h3>List of transactions</h3>
+  <h1>Delete a Transaction</h1>
 </div>
-<div>
-  <table class="table">
-    <thead>
-      <th>Delete?</th>
-      <th>Source Account</th>
-      <th>Destination Account</th>
-      <th>Date</th>
-      <th>Description</th>
-      <th>Amount</th>
-      <th>GUID</th>
-    </thead>
-    <tbody>
-      {% for trans in transactions %}
-      {% if loop.index0 % 2 == 0 %}
-      <tr class="evenrow">
-      {% else %}
-      <tr class="oddrow">
-      {% endif %}
-        <td><input type=checkbox id=delete_{{ trans['guid'] }}></td>
-	<td>{{ trans['source'] }}</td>
-	<td>{{ trans['dest'] }}</td>
-	<td>{{ trans['date'] }}</td>
-	<td>{{ trans['description'] }}</td>
-	<td>{{ trans['amount'] }}</td>
-	<td>{{ trans['guid'] }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+{{ wtf.quick_form(form) }}
 {% endblock %}

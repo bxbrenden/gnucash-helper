@@ -71,7 +71,8 @@ class DeleteTransactionForm(FlaskForm):
         global path_to_book
         global logger
         logger.info('Attempting to read GnuCash book to create DeleteTransactionForm.')
-        transactions = last_n_transactions(path_to_book, 0)
+        book = open_book(path_to_book)
+        transactions = last_n_transactions(book, 0)
 
         # List of summarized txns to display in dropdown box
         summaries = []

@@ -254,7 +254,7 @@ def summarize_transaction(txn):
             raise SystemExit
 
     # Create summary components
-    desc_summ = txn['description'][:10]
+    desc_summ = txn['description'][:20]
     date = txn['date']
     src_summ = txn['source'].split(':')[-1]
     dest_summ = txn['dest'].split(':')[-1]
