@@ -4,5 +4,4 @@
 *.log
 *.swp
 __pycache__/
-*.gnucash
 *.swp
