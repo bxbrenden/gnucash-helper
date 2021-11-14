@@ -5,6 +5,7 @@
 {% block title %} CheckYour Finance  {% endblock %}
 {% block page_content %}
 <div class="page-header">
-  <h1>Welcome to CheckYour Finance!</h1>
+  <h1>Enter a Transaction</h1>
 </div>
+{{ wtf.quick_form(form) }}
 {% endblock %}

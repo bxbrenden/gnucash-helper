@@ -60,5 +60,27 @@ sudo docker run --reset unless-stopped -d -p 8000:8000 -v /path/to/Syncthing/fol
 sudo docker logs --follow <container_ID>
 ```
 
+## Running the Docker Container Locally for Testing / Development
+**Note**: All instructions in this section assume that "locally" means inside of a Docker container based on `bxbrenden/docker-ide`.
+
+1. Ensure your python (pyenv) version is set to `3.9.8` with the `pyenv global 3.9.8` command.
+2. Change directories to the `GnuCash-Helper` dir.
+3. Run `pip install -r requirements.txt`
+4. Run `sudo mkdir /gnucash && sudo chown -R brenden:brenden /gnucash`
+5. Copy a demo GnuCash budget file to `/gnucash`
+6. Set the following environment variables:
+  - `GNUCASH_DIR` (`/gnucash`)
+  - `GNUCASH_FILE` (usually set to `demo-budget.gnucash`)
+  - `NUM_TRANSACTIONS` (`200` is fine)
+7. Start the app with:
+```
+gunicorn -b 0.0.0.0:8000 --worker-tmp-dir /dev/shm app:app
+```
+
+Run these all in one shot with some assumptions that may only work for my system:
+```
+./run.sh
+```
+
 ## License
 This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md](https://github.com/bxbrenden/GnuCash-Helper/blob/main/LICENSE.md) or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.

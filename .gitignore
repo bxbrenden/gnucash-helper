@@ -1,8 +1,6 @@
 *.LCK
 *.LNK
-*.gnucash
 *.log
 *.swp
 __pycache__/
-*.gnucash
 *.swp
