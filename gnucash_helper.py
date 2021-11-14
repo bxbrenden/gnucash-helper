@@ -133,9 +133,15 @@ def last_n_transactions(book, n=50):
     - dest: destination account name
     - date: the enter date of the transaction (e.g. 2021-01-01)
     - amount: the amount of money
+    - guid: the globally unique ID of the transaction
+    - description: the transaction description
     """
     last_n = []
-    transactions = [x for x in reversed(book.transactions[-n:])]
+    # Return all transactions if n == 0
+    if n != 0:
+        transactions = [x for x in reversed(book.transactions[-n:])]
+    elif n == 0:
+        transactions = [x for x in reversed(book.transactions)]
     logger.debug(f'`n` was set to {n} for getting last transactions')
     logger.debug(f'There are {len(transactions)} transactions in the list')
 
@@ -161,6 +167,13 @@ def last_n_transactions(book, n=50):
 
         descrip = trans.description
         amount = dest_acct.value
+        # Get the GUID for the txn
+        try:
+            guid = trans.guid
+        except AttributeError:
+            logger.error(f'Failed to get transaction GUID for txn with description {descrip}.')
+            raise SystemExit
+
         # make the amount positive for display's sake
         if amount.is_signed():
             amount = -amount
@@ -171,6 +184,7 @@ def last_n_transactions(book, n=50):
         t['dest'] = dest_acct.account.fullname
         t['description'] = descrip
         t['amount'] = f'${amount:.2f}'
+        t['guid'] = guid
         last_n.append(t)
 
     return last_n
@@ -228,3 +242,44 @@ def get_gnucash_dir():
         sys.exit(1)
     else:
         return gnucash_dir
+
+
+def summarize_transaction(txn):
+    """Given a transaction `txn`, return a shortened summary string for web forms."""
+    global logger
+
+    for key in ['description', 'source', 'dest', 'date', 'amount', 'guid']:
+        if key not in txn.keys():
+            logger.critical(f'Malformed transaction found while summarizing transaction {txn}')
+            raise SystemExit
+
+    # Create summary components
+    desc_summ = txn['description'][:10]
+    date = txn['date']
+    src_summ = txn['source'].split(':')[-1]
+    dest_summ = txn['dest'].split(':')[-1]
+    guid = txn['guid']
+
+    summary = f'Txn: {desc_summ},Date: {date},Source: {src_summ},Dest: {dest_summ},GUID: {guid}'
+
+    return summary
+
+
+def delete_transaction(book, txn):
+    """Given an already open GnuCash book, delete the summarized transaction `txn` from the book."""
+    global logger
+
+    guid = txn.split(',')[-1].replace('GUID: ', '')
+    transactions = book.transactions
+    for t in transactions:
+        if t.guid == guid:
+            logger.info(f'Attempting to delete transaction {t} from book.')
+            book.delete(t)
+            logger.info('Flushing book to ensure deletion takes hold.')
+            book.flush()
+            logger.info('Saving GnuCash book after deletion + flush.')
+            book.save()
+            return True
+
+    # If no txn had a matching GUID, return False, since no deletion occurred.
+    return False
