@@ -13,7 +13,7 @@ def configure_logging():
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('/gnucash-helper.log', encoding='utf-8')
+    fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
     fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch.setFormatter(formatter)
@@ -255,12 +255,13 @@ def summarize_transaction(txn):
 
     # Create summary components
     desc_summ = txn['description'][:20]
+    amount = txn['amount']
     date = txn['date']
     src_summ = txn['source'].split(':')[-1]
     dest_summ = txn['dest'].split(':')[-1]
     guid = txn['guid']
 
-    summary = f'Txn: {desc_summ},Date: {date},Source: {src_summ},Dest: {dest_summ},GUID: {guid}'
+    summary = f'Txn: {desc_summ},Amount: {amount},Date: {date},Source: {src_summ},Dest: {dest_summ},GUID: {guid}'
 
     return summary
 
