@@ -2,11 +2,10 @@ FROM bxbrenden/docker-ide:0.1.0
 
 LABEL "maintainer"="brendenahyde@gmail.com"
 
-USER brenden
+USER root
 
 # Install app and dependencies
-RUN sudo mkdir /app
-RUN sudo chown -R brenden /app
+RUN mkdir /app
 WORKDIR /app
 ADD requirements.txt requirements.txt
 RUN /home/brenden/.pyenv/shims/pip3 install -r requirements.txt
