@@ -5,7 +5,9 @@ from gnucash_helper import list_accounts,\
                            get_gnucash_dir,\
                            last_n_transactions,\
                            get_env_var,\
-                           logger
+                           logger,\
+                           summarize_transaction,\
+                           delete_transaction
 
 from decimal import ROUND_HALF_UP
 import os
@@ -57,6 +59,32 @@ class TransactionForm(FlaskForm):
         return txn_form
 
 
+class DeleteTransactionForm(FlaskForm):
+    del_transactions = SelectField('Select a Transaction to Delete',
+                                   validators=[DataRequired()],
+                                   validate_choice=True)
+    submit = SubmitField('Submit')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new TransactionForm."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create DeleteTransactionForm.')
+        book = open_book(path_to_book)
+        transactions = last_n_transactions(book, 0)
+
+        # List of summarized txns to display in dropdown box
+        summaries = []
+        for t in transactions:
+            summaries.append(summarize_transaction(t))
+
+        txn_form = cls()
+        txn_form.del_transactions.choices = summaries
+
+        return txn_form
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
@@ -74,11 +102,11 @@ def index():
 @app.route('/entry', methods=['GET', 'POST'])
 def entry():
     global logger
-    logger.info('Creating new form inside of the entry route')
+    logger.info('Creating new form inside of the /entry route')
     form = TransactionForm.new()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
-        logger.info('Attempting to open book in entry route')
+        logger.info('Attempting to open book in /entry route')
         gnucash_book = open_book(path_to_book)
         descrip = form.description.data
         amount = form.amount.data
@@ -96,6 +124,32 @@ def entry():
 
         return redirect(url_for('entry'))
     return render_template('entry.html', form=form)
+
+
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    global logger
+    logger.info('Creating new form inside of the /delete route')
+    form = DeleteTransactionForm.new()
+    if form.validate_on_submit():
+        # Delete the transaction from the GnuCash book
+        logger.info('Attempting to open book in /delete route')
+        gnucash_book = open_book(path_to_book)
+        txn_to_delete = form.del_transactions.data
+        txn_deleted = delete_transaction(gnucash_book, txn_to_delete)
+        gnucash_book.close()
+
+        if txn_deleted:
+            message = 'Transaction deleted from GnuCash file:\n'
+            message += txn_to_delete
+            flash(message, 'success')
+        else:
+            message = 'Transaction was NOT deleted from GnuCash file:\n'
+            message += txn_to_delete
+            flash(message, 'danger')
+
+        return redirect(url_for('entry'))
+    return render_template('delete_txn.html', form=form)
 
 
 @app.route('/transactions')
