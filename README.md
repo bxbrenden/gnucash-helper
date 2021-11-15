@@ -23,13 +23,15 @@ docker pull bxbrenden/gnucash-helper:latest
 
 ## Running the Docker Container
 This example run assumes that your environment meets these criteria:
+- You have a Docker volume created with `docker volume create gnucash`
 - You have `syncthing` installed and running
 - `syncthing` is using a directory called `Sync` in your home directory
-- The `Sync` directory in your home directory contains a file called `your_gnucash_file.gnucash`
+- The `Sync` directory in your home directory contains a file called `demo-budget.gnucash`
+- The `demo-budget.gnucash` file in `Sync` is symlinked into the `gnucash` Docker volume
 
 Example run:
 ```bash
-docker run -e "GNUCASH_FILE=your_gnucash_file.gnucash" --restart unless-stopped -d -p 8000:8000 -v "$(pwd)/Sync":/gnucash bxbrenden/gnucash-helper:latest
+docker run --restart unless-stopped -d -p 8000:8000 -v gnucash:/gnucash -e GNUCASH_FILE=demo-budget.gnucash -e GNUCASH_DIR=/gnucash -e NUM_TRANSACTIONS=1000  bxbrenden/gnucash-helper:0.1.0
 ```
 
 ## Configuration
