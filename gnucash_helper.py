@@ -209,6 +209,8 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
                                           Split(value=amount, account=credit),
                                           Split(value=-amount, account=debit)
                                       ])
+            logger.debug('Transaction successfully created.')
+            logger.debug('Attempting to save transaction')
             book.save()
             logger.info('Successfully saved transaction')
             return True
