@@ -31,7 +31,7 @@ This example run assumes that your environment meets these criteria:
 
 Example run:
 ```bash
-docker run --restart unless-stopped -d -p 8000:8000 -v gnucash:/gnucash -e GNUCASH_FILE=demo-budget.gnucash -e GNUCASH_DIR=/gnucash -e NUM_TRANSACTIONS=1000  bxbrenden/gnucash-helper:0.1.0
+docker run --restart unless-stopped -d -p 8000:8000 -v gnucash:/gnucash -e GNUCASH_FILE=demo-budget.gnucash -e GNUCASH_DIR=/gnucash -e NUM_TRANSACTIONS=1000  bxbrenden/gnucash-helper:0.4.0
 ```
 
 ## Configuration
