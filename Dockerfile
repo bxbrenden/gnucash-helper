@@ -1,29 +1,20 @@
-FROM bxbrenden/docker-ide:latest
+FROM bxbrenden/docker-ide:0.1.0
 
 LABEL "maintainer"="brendenahyde@gmail.com"
 
-USER root
+USER brenden
 
 # Install app and dependencies
-RUN mkdir /GnuCash-Helper
-WORKDIR /GnuCash-Helper
+RUN sudo mkdir /app
+RUN sudo chown -R brenden /app
+WORKDIR /app
 ADD requirements.txt requirements.txt
-ADD gnucash_helper.py gnucash_helper.py
-ADD app.py app.py
-RUN pip3 install -r requirements.txt
+RUN /home/brenden/.pyenv/shims/pip3 install -r requirements.txt
 COPY templates/ templates/
 COPY static/ static/
-
-# Make the dir where your GnuCash file will live inside the container
-ENV GNUCASH_DIR=/gnucash
-RUN mkdir $GNUCASH_DIR
-
-# This is the name of your GnuCash file
-ENV GNUCASH_FILE=budget.gnucash
-
-# Number of transactions that will be visible in txn history
-ENV NUM_TRANSACTIONS="200"
+ADD gnucash_helper.py gnucash_helper.py
+ADD app.py app.py
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/dev/shm", "app:app"]
+CMD ["/home/brenden/.pyenv/shims/gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/dev/shm", "app:app"]
