@@ -13,11 +13,11 @@ On the `Accounts` page, there should be two main sections:
   - In this section, you choose its parent account from a dropdown menu.
 
 ## Required Changes / Additions
-- [] A new Jinja2 template for the HTML page
-- [] Two functions in `gnucash_helper.py`:
-  - [] Create account
-  - [] Delete account
-- [] Two new classes in `app.py`:
-  - [] CreateAccountForm
-  - [] DeleteAccountForm
-- [] A new route in `app.py` called `/accounts`
+- [ ] A new Jinja2 template for the HTML page
+- [ ] Two functions in `gnucash_helper.py`:
+  - [ ] Create account
+  - [ ] Delete account
+- [ ] Two new classes in `app.py`:
+  - [ ] CreateAccountForm
+  - [ ] DeleteAccountForm
+- [ ] A new route in `app.py` called `/accounts`
