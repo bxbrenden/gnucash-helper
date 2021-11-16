@@ -11,15 +11,15 @@ def configure_logging():
     """Set up logging for the module."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
     fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
     fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-    ch.setFormatter(formatter)
     fh.setFormatter(formatter)
-    logger.addHandler(ch)
     logger.addHandler(fh)
+    logger.addHandler(ch)
 
     return logger
 
@@ -87,6 +87,30 @@ def get_account(account_name, book):
             return account
 
     return None
+
+
+def delete_account(book, acct_fullname):
+    """Delete a GnuCash account with the fullname."""
+    global logger
+    logger.debug('Searching for account to delete from list of accounts.')
+    account_to_delete = book.accounts.get(fullname=acct_fullname)
+
+    if account_to_delete:
+        logger.debug('Located account to delete.')
+        try:
+            logger.info(f'Attempting to delete account {acct_fullname}')
+            book.delete(account_to_delete)
+            book.flush()
+            book.save()
+        except GnucashException as gce:
+            logger.error(f'Account deletion for {acct_fullname} failed with error: {gce}')
+            return False
+        else:
+            logger.info(f'Successfully deleted account {acct_fullname}.')
+            return True
+    else:
+        logger.error(f'No account called {acct_fullname} was found.')
+        return False
 
 
 def add_account(book, new_acct_name, parent, currency='USD'):
