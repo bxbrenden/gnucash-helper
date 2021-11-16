@@ -7,7 +7,8 @@ from gnucash_helper import list_accounts,\
                            get_env_var,\
                            logger,\
                            summarize_transaction,\
-                           delete_transaction
+                           delete_transaction,\
+                           delete_account
 
 from decimal import ROUND_HALF_UP
 import os
@@ -85,6 +86,27 @@ class DeleteTransactionForm(FlaskForm):
         return txn_form
 
 
+class DeleteAccountForm(FlaskForm):
+    del_account = SelectField('Select an Account to Delete',
+                              validators=[DataRequired()],
+                              validate_choice=True)
+    submit = SubmitField('Submit')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new TransactionForm."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create DeleteAccountForm.')
+        book = open_book(path_to_book)
+        account_names = [acc.fullname for acc in book.accounts]
+
+        acc_form = cls()
+        acc_form.del_account.choices = account_names
+
+        return acc_form
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = env.get('FLASK_SECRET_KEY',
                                    'Mjpe[){i>"r3}]Fm+-{7#,m}qFtf!w)T')
@@ -150,6 +172,32 @@ def delete():
 
         return redirect(url_for('entry'))
     return render_template('delete_txn.html', form=form)
+
+
+@app.route('/accounts', methods=['GET', 'POST'])
+def accounts():
+    global logger
+    logger.info('Creating new form inside of the /accounts route')
+    delete_form = DeleteAccountForm.new()
+    if delete_form.validate_on_submit():
+        # Delete the account from the GnuCash book
+        logger.info('Attempting to open book in /accounts route')
+        gnucash_book = open_book(path_to_book)
+        acc_to_delete = delete_form.del_account.data
+        acc_deleted = delete_account(gnucash_book, acc_to_delete)
+        gnucash_book.close()
+
+        if acc_deleted:
+            message = 'Account deleted from GnuCash file:\n'
+            message += acc_to_delete
+            flash(message, 'success')
+        else:
+            message = 'Account was NOT deleted from GnuCash file:\n'
+            message += acc_to_delete
+            flash(message, 'danger')
+
+        return redirect(url_for('accounts'))
+    return render_template('accounts.html', form=delete_form)
 
 
 @app.route('/transactions')
