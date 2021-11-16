@@ -92,7 +92,7 @@ class DeleteAccountForm(FlaskForm):
     del_account = SelectField('Select an Account to Delete',
                               validators=[DataRequired()],
                               validate_choice=True)
-    submit = SubmitField('Submit')
+    submit = SubmitField('Delete')
 
     @classmethod
     def new(cls):
@@ -112,10 +112,10 @@ class DeleteAccountForm(FlaskForm):
 class AddAccountForm(FlaskForm):
     new_account = StringField('Name of your new account:',
                               validators=[DataRequired()])
-    parent_account_select = SelectField('Select an Parent Account for your new account:',
+    parent_account_select = SelectField('Parent Account for your new account:',
                                         validators=[DataRequired()],
                                         validate_choice=True)
-    submit = SubmitField('Submit')
+    submit = SubmitField('Add')
 
     @classmethod
     def new(cls):
