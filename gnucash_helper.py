@@ -96,20 +96,24 @@ def add_account(book, new_acct_name, parent, currency='USD'):
     """
     parent_account = book.accounts.get(fullname=parent)
     if parent_account:
+        # Ensure no account already exists with the requested name
         child_accts = [child.name.lower() for child in parent_account.children]
         if new_acct_name.lower() in child_accts:
             logger.warning(f'The {new_acct_name} account already exists as a child of your {parent} account. Skipping')
             return False
+        # Grab the account type of the parent account
+        # To keep things simple, the child inherits the parent's account type
+        parent_account_type = parent_account.type
     else:
         logger.error(f'There was no parent account named "{parent}"')
         return False
 
-    USD = book.commodities.get(mnemonic='USD')
-    if parent_account and USD:
+    commodity = book.commodities.get(mnemonic=currency)
+    if parent_account and commodity and parent_account_type:
         new_account = piecash.Account(name=new_acct_name,
-                                      type='EXPENSE',
+                                      type=parent_account_type,
                                       parent=parent_account,
-                                      commodity=USD)
+                                      commodity=commodity)
         try:
             book.save()
         except GnucashException as gce:
@@ -121,7 +125,7 @@ def add_account(book, new_acct_name, parent, currency='USD'):
             return True
 
     else:
-        logger.error(f'There was no parent account named "{parent}" or no commodity named "USD"')
+        logger.error(f'There was no parent account named "{parent}", no parent account type, or no commodity named "{currency}"')
         return False
 
 
