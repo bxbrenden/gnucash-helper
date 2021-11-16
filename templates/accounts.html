@@ -5,7 +5,12 @@
 {% block title %} CheckYour Finance  {% endblock %}
 {% block page_content %}
 <div class="page-header">
-  <h1>Delete an Account</h1>
+  <h1>Manage Accounts</h1>
+  <h2>Add an Account</h2>
 </div>
-{{ wtf.quick_form(form) }}
+{{ wtf.quick_form(add_form) }}
+<div>
+  <h2>Delete an Account</h2>
+</div>
+{{ wtf.quick_form(delete_form) }}
 {% endblock %}
