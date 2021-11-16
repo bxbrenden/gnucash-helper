@@ -124,10 +124,9 @@ class AddAccountForm(FlaskForm):
         global logger
         logger.info('Attempting to read GnuCash book to create AddAccountForm.')
         book = open_book(path_to_book)
-        account_names = ['Add this account to the root of the Book (no parent)']
-        account_names.extend([acc.fullname for acc in book.accounts])
+        account_names = sorted([acc.fullname for acc in book.accounts])
         add_acc_form = cls()
-        add_acc_form.parent_account_select.choices = sorted(account_names)
+        add_acc_form.parent_account_select.choices = account_names
 
         return add_acc_form
 
