@@ -15,7 +15,7 @@ On the `Accounts` page, there should be two main sections:
 ## Required Changes / Additions
 - [ ] A new Jinja2 template for the HTML page
 - [ ] Two functions in `gnucash_helper.py`:
-  - [ ] Create account
+  - [x] Create account
   - [ ] Delete account
 - [ ] Two new classes in `app.py`:
   - [ ] CreateAccountForm
