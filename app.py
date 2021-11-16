@@ -8,7 +8,8 @@ from gnucash_helper import list_accounts,\
                            logger,\
                            summarize_transaction,\
                            delete_transaction,\
-                           delete_account
+                           delete_account,\
+                           add_account
 
 from decimal import ROUND_HALF_UP
 import os
@@ -20,7 +21,8 @@ from flask_wtf import FlaskForm
 from wtforms import DecimalField,\
                     SelectField,\
                     SubmitField,\
-                    TextAreaField
+                    TextAreaField,\
+                    StringField
 
 from wtforms.validators import DataRequired
 
@@ -68,7 +70,7 @@ class DeleteTransactionForm(FlaskForm):
 
     @classmethod
     def new(cls):
-        """Instantiate a new TransactionForm."""
+        """Instantiate a new DeleteTransactionForm."""
         global path_to_book
         global logger
         logger.info('Attempting to read GnuCash book to create DeleteTransactionForm.')
@@ -94,17 +96,40 @@ class DeleteAccountForm(FlaskForm):
 
     @classmethod
     def new(cls):
-        """Instantiate a new TransactionForm."""
+        """Instantiate a new DeleteAccountForm."""
         global path_to_book
         global logger
         logger.info('Attempting to read GnuCash book to create DeleteAccountForm.')
         book = open_book(path_to_book)
-        account_names = [acc.fullname for acc in book.accounts]
+        account_names = sorted([acc.fullname for acc in book.accounts])
 
-        acc_form = cls()
-        acc_form.del_account.choices = account_names
+        del_acc_form = cls()
+        del_acc_form.del_account.choices = account_names
 
-        return acc_form
+        return del_acc_form
+
+
+class AddAccountForm(FlaskForm):
+    new_account = StringField('Name of your new account:',
+                              validators=[DataRequired()])
+    parent_account_select = SelectField('Select an Parent Account for your new account:',
+                                        validators=[DataRequired()],
+                                        validate_choice=True)
+    submit = SubmitField('Submit')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new AddAccountForm."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create AddAccountForm.')
+        book = open_book(path_to_book)
+        account_names = ['Add this account to the root of the Book (no parent)']
+        account_names.extend([acc.fullname for acc in book.accounts])
+        add_acc_form = cls()
+        add_acc_form.parent_account_select.choices = sorted(account_names)
+
+        return add_acc_form
 
 
 app = Flask(__name__)
@@ -179,6 +204,7 @@ def accounts():
     global logger
     logger.info('Creating new form inside of the /accounts route')
     delete_form = DeleteAccountForm.new()
+    add_form = AddAccountForm.new()
     if delete_form.validate_on_submit():
         # Delete the account from the GnuCash book
         logger.info('Attempting to open book in /accounts route')
@@ -197,7 +223,23 @@ def accounts():
             flash(message, 'danger')
 
         return redirect(url_for('accounts'))
-    return render_template('accounts.html', form=delete_form)
+    elif add_form.validate_on_submit():
+        logger.info('Attempting to open book in /accounts route')
+        gnucash_book = open_book(path_to_book)
+        acc_to_add = add_form.new_account.data
+        parent_account = add_form.parent_account_select.data
+        acc_added = add_account(gnucash_book, acc_to_add, parent_account)
+        gnucash_book.close()
+
+        if acc_added:
+            message = f'Account "{acc_to_add}" added to GnuCash file:\n'
+            flash(message, 'success')
+        else:
+            message = f'Account "{acc_to_add}" was NOT added to GnuCash file:\n'
+            flash(message, 'danger')
+
+        return redirect(url_for('accounts'))
+    return render_template('accounts.html', delete_form=delete_form, add_form=add_form)
 
 
 @app.route('/transactions')
