@@ -11,15 +11,15 @@ def configure_logging():
     """Set up logging for the module."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
     fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
     fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-    ch.setFormatter(formatter)
     fh.setFormatter(formatter)
-    logger.addHandler(ch)
     logger.addHandler(fh)
+    logger.addHandler(ch)
 
     return logger
 
@@ -89,6 +89,30 @@ def get_account(account_name, book):
     return None
 
 
+def delete_account(book, acct_fullname):
+    """Delete a GnuCash account with the fullname."""
+    global logger
+    logger.debug('Searching for account to delete from list of accounts.')
+    account_to_delete = book.accounts.get(fullname=acct_fullname)
+
+    if account_to_delete:
+        logger.debug('Located account to delete.')
+        try:
+            logger.info(f'Attempting to delete account {acct_fullname}')
+            book.delete(account_to_delete)
+            book.flush()
+            book.save()
+        except GnucashException as gce:
+            logger.error(f'Account deletion for {acct_fullname} failed with error: {gce}')
+            return False
+        else:
+            logger.info(f'Successfully deleted account {acct_fullname}.')
+            return True
+    else:
+        logger.error(f'No account called {acct_fullname} was found.')
+        return False
+
+
 def add_account(book, new_acct_name, parent, currency='USD'):
     """Add a GnuCash account with name `new_acct_name` and a parent account of `parent`.
 
@@ -96,20 +120,24 @@ def add_account(book, new_acct_name, parent, currency='USD'):
     """
     parent_account = book.accounts.get(fullname=parent)
     if parent_account:
+        # Ensure no account already exists with the requested name
         child_accts = [child.name.lower() for child in parent_account.children]
         if new_acct_name.lower() in child_accts:
             logger.warning(f'The {new_acct_name} account already exists as a child of your {parent} account. Skipping')
             return False
+        # Grab the account type of the parent account
+        # To keep things simple, the child inherits the parent's account type
+        parent_account_type = parent_account.type
     else:
         logger.error(f'There was no parent account named "{parent}"')
         return False
 
-    USD = book.commodities.get(mnemonic='USD')
-    if parent_account and USD:
+    commodity = book.commodities.get(mnemonic=currency)
+    if parent_account and commodity and parent_account_type:
         new_account = piecash.Account(name=new_acct_name,
-                                      type='EXPENSE',
+                                      type=parent_account_type,
                                       parent=parent_account,
-                                      commodity=USD)
+                                      commodity=commodity)
         try:
             book.save()
         except GnucashException as gce:
@@ -121,7 +149,7 @@ def add_account(book, new_acct_name, parent, currency='USD'):
             return True
 
     else:
-        logger.error(f'There was no parent account named "{parent}" or no commodity named "USD"')
+        logger.error(f'There was no parent account named "{parent}", no parent account type, or no commodity named "{currency}"')
         return False
 
 
