@@ -314,3 +314,80 @@ def delete_transaction(book, txn):
 
     # If no txn had a matching GUID, return False, since no deletion occurred.
     return False
+
+
+def get_highest_ancestor_acct(book, account_name, join_at_index=1):
+    """Given a book and an account name, return the name of the upmost ancestor
+       account that is not a placeholder account.
+
+       For example, if I have an account which I want to delete called
+       'Assets:Budget:Subscriptions:2600 Magazine', we want to find the
+       highest-level (closest to the root of the account tree) account in
+       the hierarchy.
+
+       If `Assets` is not a placeholder, it is returned by this function.
+       If `Assets` is a placeholder, `Budget` is checked for placeholder status.
+       Whichever is the highest one that is not a placeholder is returned.
+
+       Because this will be used recursively, the `join_at_index` value is used
+       to tell the recursion where to stop. In our example above, the first time
+       `get_highest_ancestor_acct` is called, it will start colon-joining things at
+       at index 1 which returns the value `Assets`. If the `Assets` account is not a
+       placeholder, it is returned.
+
+       However, if it's not, we _recursively_ call `get_highest_ancestor_acct` with
+       a `join_at_index` of 2. This tells the function that it can't re-check `Assets`,
+       opting instead to see if `Assets:Budget` is a placeholder.
+       """
+
+    global logger
+    logger.debug(f'Searching for highest non-placeholder account in the {account_name} hierarchy')
+    hierarchy = account_name.split(':')
+    test_account_name = ':'.join(hierarchy[:join_at_index])
+    test_account = book.accounts.get(fullname=test_account_name)
+    if test_account is not None:
+        if test_account.placeholder == 0:
+            return test_account
+        elif test_account.placeholder == 1:
+            return get_highest_ancestor_acct(book, account_name, join_at_index+1)
+    else:
+        logger.error(f'No account by the name of {test_account} was found in book {book}.')
+
+
+def delete_account_with_inheritance(book, acct_fullname):
+    """Delete an account from a GnuCash book and let an ancestor account inherit its txns."""
+    global logger
+    logger.debug(f'Deleting account {acct_fullname} with inheritance')
+    acct_to_delete = get_account(acct_fullname, book)
+
+    # Determine which account should inherit the transactions
+    inheriting_acct = get_highest_ancestor_acct(book, acct_fullname)
+    logger.debug(f'The upmost account that is not a placeholder is: {inheriting_acct.fullname}')
+
+    # Get all splits for the account that will be deleted
+    del_splits = acct_to_delete.splits
+
+    # Find the transactions that the splits were part of
+    txns = []
+    for ds in del_splits:
+        txns.append(ds.transaction)
+
+    # "Replay" those transactions by modifying splits to have the inheriting
+    #    account in place of the soon-to-be deleted account
+    logger.debug(f'Identifying splits that match account {acct_fullname}')
+    for t in txns:
+        for spl in t.splits:
+            if spl.account.fullname == acct_fullname:
+                logger.debug(f'Split {spl} matches due to account fullname {spl.account.fullname}')
+                spl.account = inheriting_acct
+                book.flush()
+                book.save()
+
+    deleted = delete_account(book, acct_fullname)
+
+    if deleted:
+        logger.info(f'Successfully deleted account {acct_fullname}.')
+        return True
+    else:
+        logger.error(f'Failed to delete account {acct_fullname}.')
+        return False
