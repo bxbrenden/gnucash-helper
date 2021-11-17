@@ -314,3 +314,41 @@ def delete_transaction(book, txn):
 
     # If no txn had a matching GUID, return False, since no deletion occurred.
     return False
+
+
+def get_highest_ancestor_acct(book, account_name, join_at_index=1):
+    """Given a book and an account name, return the name of the upmost ancestor
+       account that is not a placeholder account.
+
+       For example, if I have an account which I want to delete called
+       'Assets:Budget:Subscriptions:2600 Magazine', we want to find the
+       highest-level (closest to the root of the account tree) account in
+       the hierarchy.
+
+       If `Assets` is not a placeholder, it is returned by this function.
+       If `Assets` is a placeholder, `Budget` is checked for placeholder status.
+       Whichever is the highest one that is not a placeholder is returned.
+
+       Because this will be used recursively, the `join_at_index` value is used
+       to tell the recursion where to stop. In our example above, the first time
+       `get_highest_ancestor_acct` is called, it will start colon-joining things at
+       at index 1 which returns the value `Assets`. If the `Assets` account is not a
+       placeholder, it is returned.
+
+       However, if it's not, we _recursively_ call `get_highest_ancestor_acct` with
+       a `join_at_index` of 2. This tells the function that it can't re-check `Assets`,
+       opting instead to see if `Assets:Budget` is a placeholder.
+       """
+
+    global logger
+    logger.debug(f'Searching for highest non-placeholder account in the {account_name} hierarchy')
+    hierarchy = account_name.split(':')
+    test_account_name = ':'.join(hierarchy[:join_at_index])
+    test_account = book.accounts.get(fullname=test_account_name)
+    if test_account is not None:
+        if test_account.placeholder == 0:
+            return test_account
+        elif test_account.placeholder == 1:
+            return get_highest_ancestor_acct(book, account_name, join_at_index+1)
+    else:
+        logger.error(f'No account by the name of {test_account} was found in book {book}.')
