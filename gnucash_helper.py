@@ -352,3 +352,42 @@ def get_highest_ancestor_acct(book, account_name, join_at_index=1):
             return get_highest_ancestor_acct(book, account_name, join_at_index+1)
     else:
         logger.error(f'No account by the name of {test_account} was found in book {book}.')
+
+
+def delete_account_with_inheritance(book, acct_fullname):
+    """Delete an account from a GnuCash book and let an ancestor account inherit its txns."""
+    global logger
+    logger.debug(f'Deleting account {acct_fullname} with inheritance')
+    acct_to_delete = get_account(acct_fullname, book)
+
+    # Determine which account should inherit the transactions
+    inheriting_acct = get_highest_ancestor_acct(book, acct_fullname)
+    logger.debug(f'The upmost account that is not a placeholder is: {inheriting_acct.fullname}')
+
+    # Get all splits for the account that will be deleted
+    del_splits = acct_to_delete.splits
+
+    # Find the transactions that the splits were part of
+    txns = []
+    for ds in del_splits:
+        txns.append(ds.transaction)
+
+    # "Replay" those transactions by modifying splits to have the inheriting
+    #    account in place of the soon-to-be deleted account
+    logger.debug(f'Identifying splits that match account {acct_fullname}')
+    for t in txns:
+        for spl in t.splits:
+            if spl.account.fullname == acct_fullname:
+                logger.debug(f'Split {spl} matches due to account fullname {spl.account.fullname}')
+                spl.account = inheriting_acct
+                book.flush()
+                book.save()
+
+    deleted = delete_account(book, acct_fullname)
+
+    if deleted:
+        logger.info(f'Successfully deleted account {acct_fullname}.')
+        return True
+    else:
+        logger.error(f'Failed to delete account {acct_fullname}.')
+        return False
