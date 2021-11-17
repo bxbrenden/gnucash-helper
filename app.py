@@ -8,7 +8,7 @@ from gnucash_helper import list_accounts,\
                            logger,\
                            summarize_transaction,\
                            delete_transaction,\
-                           delete_account,\
+                           delete_account_with_inheritance,\
                            add_account
 
 from decimal import ROUND_HALF_UP
@@ -209,7 +209,7 @@ def accounts():
         logger.info('Attempting to open book in /accounts route')
         gnucash_book = open_book(path_to_book)
         acc_to_delete = delete_form.del_account.data
-        acc_deleted = delete_account(gnucash_book, acc_to_delete)
+        acc_deleted = delete_account_with_inheritance(gnucash_book, acc_to_delete)
         gnucash_book.close()
 
         if acc_deleted:
