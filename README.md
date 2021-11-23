@@ -1,5 +1,6 @@
 # gnucash-helper
 ![gnucash-helper logo](https://github.com/bxbrenden/gnucash-helper/blob/main/static/gnucash-helper-bubble-logo_08-300x300.png)
+
 gnucash-helper is a small Flask app for entering and viewing GnuCash transactions and account balances from a web browser.
 Once your GnuCash file is configured in the _real_ GnuCash, GnuCash Helper can be run as a standalone tool for simple budgeting.
 You can use [Syncthing](https://syncthing.net/) to ensure that your GnuCash file is synchronized from your server to your other devices.
