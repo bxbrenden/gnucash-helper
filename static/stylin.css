@@ -27,7 +27,3 @@ table {
   table-layout: fixed;
   overflow-wrap: break-word;
 }
-
-.table > tbody > tr > td {
-  overflow: scroll;
-}
