@@ -13,3 +13,12 @@ tr.evenrow {
 tr.oddrow {
   background-color: #bcdcbc;
 }
+
+.logo {
+  float: left;
+  padding-left: 10px;
+}
+
+.navbar-left {
+  text-decoration: none;
+}
