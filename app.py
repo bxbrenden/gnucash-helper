@@ -66,7 +66,7 @@ class DeleteTransactionForm(FlaskForm):
     del_transactions = SelectField('Select a Transaction to Delete',
                                    validators=[DataRequired()],
                                    validate_choice=True)
-    submit = SubmitField('Submit')
+    submit = SubmitField('Delete')
 
     @classmethod
     def new(cls):
