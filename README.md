@@ -1,6 +1,6 @@
-# GnuCash-Helper
+# gnucash-helper
 
-GnuCash-Helper is a small Flask app for entering and viewing GnuCash transactions and account balances from a web browser.
+gnucash-helper is a small Flask app for entering and viewing GnuCash transactions and account balances from a web browser.
 Once your GnuCash file is configured in the _real_ GnuCash, GnuCash Helper can be run as a standalone tool for simple budgeting.
 You can use [Syncthing](https://syncthing.net/) to ensure that your GnuCash file is synchronized from your server to your other devices.
 
@@ -66,7 +66,7 @@ sudo docker logs --follow <container_ID>
 **Note**: All instructions in this section assume that "locally" means inside of a Docker container based on `bxbrenden/docker-ide`.
 
 1. Ensure your python (pyenv) version is set to `3.9.8` with the `pyenv global 3.9.8` command.
-2. Change directories to the `GnuCash-Helper` dir.
+2. Change directories to the `gnucash-helper` dir.
 3. Run `pip install -r requirements.txt`
 4. Run `sudo mkdir /gnucash && sudo chown -R brenden:brenden /gnucash`
 5. Copy a demo GnuCash budget file to `/gnucash`
@@ -85,4 +85,4 @@ Run these all in one shot with some assumptions that may only work for my system
 ```
 
 ## License
-This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md](https://github.com/bxbrenden/GnuCash-Helper/blob/main/LICENSE.md) or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.
+This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md](https://github.com/bxbrenden/gnucash-helper/blob/main/LICENSE.md) or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.
