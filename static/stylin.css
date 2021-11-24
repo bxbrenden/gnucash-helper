@@ -22,3 +22,8 @@ tr.oddrow {
 .navbar-left {
   text-decoration: none;
 }
+
+table {
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
