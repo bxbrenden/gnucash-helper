@@ -7,26 +7,6 @@ import piecash
 from piecash import Transaction, Split, GnucashException
 
 
-def configure_logging():
-    """Set up logging for the module."""
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-    logger.addHandler(ch)
-
-    return logger
-
-
-logger = configure_logging()
-
-
 def get_env_var(name):
     """Get the environment variable `name` from environment variable.
 
@@ -38,6 +18,27 @@ def get_env_var(name):
         logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
     else:
         return env_var
+
+
+def configure_logging():
+    """Set up logging for the module."""
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    if gnucash_dir := get_env_var('GNUCASH_DIR'):
+        fh = logging.FileHandler(f'{gnucash_dir}/gnucash-helper.log', encoding='utf-8')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+    logger.addHandler(ch)
+
+    return logger
+
+
+logger = configure_logging()
 
 
 def get_book_name_from_env():
