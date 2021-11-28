@@ -5,8 +5,11 @@ LABEL "maintainer"="brendenahyde@gmail.com"
 USER root
 
 # Install app and dependencies
-RUN mkdir /app
-WORKDIR /app
+ENV LOG_DIR=/gnucash
+RUN mkdir -p $LOG_DIR
+ENV APP_DIR=/app
+RUN mkdir -p $APP_DIR
+WORKDIR $APP_DIR
 ADD requirements.txt requirements.txt
 RUN /home/brenden/.pyenv/shims/pip3 install -r requirements.txt
 COPY templates/ templates/
