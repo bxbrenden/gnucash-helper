@@ -415,16 +415,31 @@ def get_scaleway_s3_client():
     return s3
 
 
-def get_gnucash_file_from_scaleway_s3(object_key, bucket_name, s3_client):
-    """Download the .gnucash file from Scaleway S3 (Object Storage).
+def download_gnucash_file_from_scaleway_s3(object_key, dest_path, bucket_name, s3_client):
+    """Download the .gnucash file from Scaleway S3 (Object Storage) to the destination path.
 
        The s3_client object should be created using the function called
        get_scaleway_s3_client().
+
+       The dest_path should be set to the fully qualified path where S3 will temporarily
+       store the GnuCash file.
 
        The bucket_name param is the name of your Scaleway Object Storage bucket.
 
        the object_key param  is the object key / name in Scaleway Object Storage.
     """
-    gnucash_file_obj = s3_client.get_object(Bucket=bucket_name,
-                                            Key=object_key
-                                            )
+    global logger
+    try:
+        s3_client.download_file(Bucket=bucket_name,
+                                Key=object_key,
+                                Filename=dest_path
+                                )
+        logger.info(f'Successfully downloaded GnuCash file {object_key} from S3.')
+    except ClientError as ce:
+        if ce.response['Error']['Code'] == 'NoSuchKey':
+            msg = 'Attempted to pull down GnuCash file from S3, but no such file.'
+        else:
+            msg = 'Attempted to pull down GnuCash file from S3, but unexpected error occurred:\n'
+            msg += ce
+        logger.critical(msg)
+        raise SystemExit
