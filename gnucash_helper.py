@@ -3,6 +3,8 @@ import logging
 from os import environ as env
 import sys
 
+from botocore.exceptions import ClientError
+import boto3
 import piecash
 from piecash import Transaction, Split, GnucashException
 
@@ -15,7 +17,8 @@ def get_env_var(name):
     try:
         env_var = env[name]
     except KeyError as ke:
-        logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
+        print(f'Could not get env. var. "{ke}". Make sure it is set')
+        sys.exit(1)
     else:
         return env_var
 
@@ -392,3 +395,36 @@ def delete_account_with_inheritance(book, acct_fullname):
     else:
         logger.error(f'Failed to delete account {acct_fullname}.')
         return False
+
+
+def get_scaleway_s3_client():
+    """Get a boto3 s3 client to use with Scaleway Object Storage."""
+    SCALEWAY_ACCESS_KEY_ID = get_env_var('SCALEWAY_ACCESS_KEY_ID')
+    SCALEWAY_SECRET_ACCESS_KEY = get_env_var('SCALEWAY_SECRET_ACCESS_KEY')
+
+    # static Scaleway settings (using NL region only)
+    S3_REGION_NAME = 'nl-ams'
+    S3_ENDPOINT_URL = 'https://s3.nl-ams.scw.cloud'
+
+    s3 = boto3.client('s3',
+                      region_name=S3_REGION_NAME,
+                      endpoint_url=S3_ENDPOINT_URL,
+                      aws_access_key_id=SCALEWAY_ACCESS_KEY_ID,
+                      aws_secret_access_key=SCALEWAY_SECRET_ACCESS_KEY
+                      )
+    return s3
+
+
+def get_gnucash_file_from_scaleway_s3(object_key, bucket_name, s3_client):
+    """Download the .gnucash file from Scaleway S3 (Object Storage).
+
+       The s3_client object should be created using the function called
+       get_scaleway_s3_client().
+
+       The bucket_name param is the name of your Scaleway Object Storage bucket.
+
+       the object_key param  is the object key / name in Scaleway Object Storage.
+    """
+    gnucash_file_obj = s3_client.get_object(Bucket=bucket_name,
+                                            Key=object_key
+                                            )
