@@ -472,3 +472,38 @@ def delete_local_gnucash_file(file_path):
         msg += ose
         logger.error(msg)
         return False
+
+
+def upload_gnucash_file_to_s3_and_delete_local(path_to_book,
+                                               book_name,
+                                               bucket_name,
+                                               s3_client):
+    """Upload GnuCash file to Scaleway S3 and delete the local copy.
+
+       Return a two-tuple of booleans where index 0 is True when upload succeeds
+       and where index 1 is True when deletion of local GnuCash file succeeds.
+    """
+    global logger
+    logger.info(f'Uploading GnuCash file {path_to_book} to Scaleway S3 bucket {bucket_name}.')
+    uploaded = upload_gnucash_file_to_scaleway_s3(path_to_book,
+                                                  bucket_name,
+                                                  book_name,
+                                                  s3_client)
+    if uploaded:
+        logger.info('Successfully uploaded GnuCash file to Scaleway S3.')
+        logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
+        if deleted := delete_local_gnucash_file(path_to_book):
+            logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
+            return (True, True)
+        else:
+            logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
+            return (True, False)
+    else:
+        logger.error('Failed to upload GnuCash file to Scaleway S3.')
+        logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
+        if deleted := delete_local_gnucash_file(path_to_book):
+            logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
+            return (False, True)
+        else:
+            logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
+            return (False, False)
