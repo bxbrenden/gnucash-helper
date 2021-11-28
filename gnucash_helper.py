@@ -1,5 +1,6 @@
 """Utility functions for GnuCash Helper."""
 import logging
+import os
 from os import environ as env
 import sys
 
@@ -446,7 +447,8 @@ def download_gnucash_file_from_scaleway_s3(object_key, dest_path, bucket_name, s
 
 
 def upload_gnucash_file_to_scaleway_s3(src_path, bucket_name, obj_key, s3_client):
-    """"""
+    """Upload a GnuCash file to Scaleway Object Storage."""
+    global logger
     try:
         s3_client.upload_file(Filename=src_path, Bucket=bucket_name, Key=obj_key)
     except ClientError as ce:
@@ -456,3 +458,17 @@ def upload_gnucash_file_to_scaleway_s3(src_path, bucket_name, obj_key, s3_client
         return False
     else:
         return True
+
+
+def delete_local_gnucash_file(file_path):
+    """Delete the local copy of a GnuCash file after uploading to Scaleway S3."""
+    global logger
+    try:
+        logger.info(f'Removing GnuCash file at path "{file_path}".')
+        os.remove(file_path)
+        return True
+    except OSError as ose:
+        msg = f'Failed to delete GnuCash file at path "{file_path}" with error:\n'
+        msg += ose
+        logger.error(msg)
+        return False
