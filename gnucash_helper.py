@@ -442,8 +442,8 @@ def download_gnucash_file_from_scaleway_s3(object_key, dest_path, bucket_name, s
         if ce.response['Error']['Code'] == 'NoSuchKey':
             msg = 'Attempted to pull down GnuCash file from S3, but no such file.'
         else:
-            msg = 'Attempted to pull down GnuCash file from S3, but unexpected error occurred:\n'
-            msg += ce
+            msg = 'Attempted to pull down GnuCash file from S3, but unexpected error occurred: '
+            msg += ce.response['Error']['Code'] + ' ' + ce.response['Error']['Message']
         logger.critical(msg)
         return False
     else:
@@ -456,8 +456,8 @@ def upload_gnucash_file_to_scaleway_s3(src_path, bucket_name, obj_key, s3_client
     try:
         s3_client.upload_file(Filename=src_path, Bucket=bucket_name, Key=obj_key)
     except ClientError as ce:
-        msg = 'Failed to upload GnuCash file to S3 with error:\n'
-        msg += ce
+        msg = 'Failed to upload GnuCash file to S3 with error: '
+        msg += ce.response['Error']['Code'] + ' ' + ce.response['Error']['Message']
         logger.critical(msg)
         return False
     else:
@@ -499,20 +499,20 @@ def upload_gnucash_file_to_s3_and_delete_local(path_to_book,
         logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
         if deleted := delete_local_gnucash_file(path_to_book):
             logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
-            flash(f'Successfully saved GnuCash file to the cloud and cleaned up local data.',
+            flash('Successfully saved GnuCash file to the cloud and cleaned up local data.',
                   'success')
         else:
             logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
-            flash(f'Successfully saved GnuCash file to the cloud but failed to clean up local data.',
+            flash('Successfully saved GnuCash file to the cloud but failed to clean up local data.',
                   'warning')
     else:
         logger.error('Failed to upload GnuCash file to Scaleway S3.')
         logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
         if deleted := delete_local_gnucash_file(path_to_book):
             logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
-            flash(f'Failed to save GnuCash file to the cloud but successfully cleaned up local data',
+            flash('Failed to save GnuCash file to the cloud but successfully cleaned up local data',
                   'danger')
         else:
             logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
-            flash(f'Failed to save GnuCash file to the cloud and failed to clean up local data.',
+            flash('Failed to save GnuCash file to the cloud and failed to clean up local data.',
                   'danger')
