@@ -12,8 +12,7 @@ from gnucash_helper import list_accounts,\
                            add_account,\
                            get_scaleway_s3_client,\
                            download_gnucash_file_from_scaleway_s3,\
-                           upload_gnucash_file_to_s3_and_delete_local,\
-                           delete_local_gnucash_file
+                           upload_gnucash_file_to_s3_and_delete_local
 
 from decimal import ROUND_HALF_UP
 import os
@@ -116,8 +115,14 @@ class DeleteAccountForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new DeleteAccountForm."""
-        global path_to_book
-        global logger
+        global logger, path_to_book, book_name, s3_client, s3_bucket_name
+        logger.info('Attempting to download GnuCash file for /accounts.')
+        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
+            logger.info('Successfully downloaded GnuCash file for /accounts.')
+        else:
+            logger.critical('Failed to download GnuCash file for /accounts.')
+            raise SystemExit
+
         logger.info('Attempting to read GnuCash book to create DeleteAccountForm.')
         book = open_book(path_to_book)
         account_names = sorted([acc.fullname for acc in book.accounts])
@@ -139,8 +144,14 @@ class AddAccountForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new AddAccountForm."""
-        global path_to_book
-        global logger
+        global logger, path_to_book, book_name, s3_client, s3_bucket_name
+        logger.info('Attempting to download GnuCash file for /accounts.')
+        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
+            logger.info('Successfully downloaded GnuCash file for /accounts.')
+        else:
+            logger.critical('Failed to download GnuCash file for /accounts.')
+            raise SystemExit
+
         logger.info('Attempting to read GnuCash book to create AddAccountForm.')
         book = open_book(path_to_book)
         account_names = sorted([acc.fullname for acc in book.accounts])
@@ -231,9 +242,7 @@ def accounts():
         gnucash_book.close()
 
         if acc_deleted:
-            message = 'Account deleted from GnuCash file:\n'
-            message += acc_to_delete
-            flash(message, 'success')
+            upload_gnucash_file_to_s3_and_delete_local(path_to_book, book_name, s3_bucket_name, s3_client)
         else:
             message = 'Account was NOT deleted from GnuCash file:\n'
             message += acc_to_delete
@@ -249,8 +258,7 @@ def accounts():
         gnucash_book.close()
 
         if acc_added:
-            message = f'Account "{acc_to_add}" added to GnuCash file:\n'
-            flash(message, 'success')
+            upload_gnucash_file_to_s3_and_delete_local(path_to_book, book_name, s3_bucket_name, s3_client)
         else:
             message = f'Account "{acc_to_add}" was NOT added to GnuCash file:\n'
             flash(message, 'danger')
