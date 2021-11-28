@@ -443,3 +443,16 @@ def download_gnucash_file_from_scaleway_s3(object_key, dest_path, bucket_name, s
             msg += ce
         logger.critical(msg)
         raise SystemExit
+
+
+def upload_gnucash_file_to_scaleway_s3(src_path, bucket_name, obj_key, s3_client):
+    """"""
+    try:
+        s3_client.upload_file(Filename=src_path, Bucket=bucket_name, Key=obj_key)
+    except ClientError as ce:
+        msg = 'Failed to upload GnuCash file to S3 with error:\n'
+        msg += ce
+        logger.critical(msg)
+        return False
+    else:
+        return True
