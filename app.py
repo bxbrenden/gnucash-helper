@@ -9,7 +9,11 @@ from gnucash_helper import list_accounts,\
                            summarize_transaction,\
                            delete_transaction,\
                            delete_account_with_inheritance,\
-                           add_account
+                           add_account,\
+                           get_scaleway_s3_client,\
+                           download_gnucash_file_from_scaleway_s3,\
+                           upload_gnucash_file_to_s3_and_delete_local,\
+                           delete_local_gnucash_file
 
 from decimal import ROUND_HALF_UP
 import os
@@ -29,8 +33,13 @@ from wtforms.validators import DataRequired
 book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
 path_to_book = gnucash_dir + '/' + book_name
+s3_bucket_name = get_env_var('SCALEWAY_S3_BUCKET')
+s3_client = get_scaleway_s3_client()
+book_downloaded = download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_client)
 book_exists = os.path.exists(path_to_book)
-logger.info(f'At the global start, the book\'s existence is: {book_exists}')
+if not book_exists:
+    logger.critical(f'The file "{path_to_book}" does not exist, so gnucash-helper cannot start.')
+    raise SystemExit
 
 
 class TransactionForm(FlaskForm):
@@ -51,8 +60,13 @@ class TransactionForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new TransactionForm."""
-        global path_to_book
-        global logger
+        global logger, path_to_book, book_name, s3_client, s3_bucket_name
+        logger.info(f'Attempting to download GnuCash file {book_name} from Scaleway S3.')
+        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
+            logger.info('Successfully downloaded GnuCash file from S3 for /entry.')
+        else:
+            logger.critical('Failed to download GnuCash file from S3 for /entry.')
+            raise SystemExit
         logger.info('Attempting to read GnuCash book to create TransactionForm.')
         accounts = list_accounts(path_to_book)
         txn_form = cls()
@@ -147,7 +161,7 @@ def index():
 
 @app.route('/entry', methods=['GET', 'POST'])
 def entry():
-    global logger
+    global logger, path_to_book, s3_bucket_name, s3_client, book_name
     logger.info('Creating new form inside of the /entry route')
     form = TransactionForm.new()
     if form.validate_on_submit():
@@ -161,13 +175,32 @@ def entry():
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
         gnucash_book.close()
 
+        # Upload the GnuCash book to Scaleway S3 and delete local copy
         if added_txn:
-            flash(f'Transaction for {float(amount):.2f} saved to GnuCash file.',
-                  'success')
+            uploaded, deleted = upload_gnucash_file_to_s3_and_delete_local(path_to_book,
+                                                                           book_name,
+                                                                           s3_bucket_name,
+                                                                           s3_client)
+            if uploaded and deleted:
+                flash(f'Successfully saved transaction for ${float(amount):.2f} to the cloud and cleaned up local data.',
+                      'success')
+            elif uploaded and not deleted:
+                flash(f'Successfully saved transaction for ${float(amount):.2f} to the cloud but failed to clean up local data.',
+                      'warning')
+            elif deleted and not uploaded:
+                flash(f'Failed to save transaction for ${float(amount):.2f} to the cloud but successfully cleaned up local data',
+                      'danger')
+            elif not uploaded and not deleted:
+                flash(f'Failed to save transaction for ${float(amount):.2f} to the cloud and failed to clean up local data.',
+                      'danger')
         else:
-            flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
-                  'danger')
-
+            if deleted := delete_local_gnucash_file(path_to_book):
+                msg = f'Failed to save transaction for ${float(amount):.2f} to the GnuCash file '
+                msg += 'but successfully cleaned up local data.'
+                flash(msg, 'danger')
+            else:
+                msg = f'Failed to save transaction for {float(amount):.2f} and failed to clean up local data'
+                flash(msg, 'danger')
         return redirect(url_for('entry'))
     return render_template('entry.html', form=form)
 
