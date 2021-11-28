@@ -499,20 +499,20 @@ def upload_gnucash_file_to_s3_and_delete_local(path_to_book,
         logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
         if deleted := delete_local_gnucash_file(path_to_book):
             logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
-            flash(f'Successfully saved transaction to the cloud and cleaned up local data.',
+            flash(f'Successfully saved GnuCash file to the cloud and cleaned up local data.',
                   'success')
         else:
             logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
-            flash(f'Successfully saved transaction to the cloud but failed to clean up local data.',
+            flash(f'Successfully saved GnuCash file to the cloud but failed to clean up local data.',
                   'warning')
     else:
         logger.error('Failed to upload GnuCash file to Scaleway S3.')
         logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
         if deleted := delete_local_gnucash_file(path_to_book):
             logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
-            flash(f'Failed to save transaction to the cloud but successfully cleaned up local data',
+            flash(f'Failed to save GnuCash file to the cloud but successfully cleaned up local data',
                   'danger')
         else:
             logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
-            flash(f'Failed to save transaction to the cloud and failed to clean up local data.',
+            flash(f'Failed to save GnuCash file to the cloud and failed to clean up local data.',
                   'danger')
