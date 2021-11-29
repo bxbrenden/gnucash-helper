@@ -1,8 +1,12 @@
 """Utility functions for GnuCash Helper."""
 import logging
+import os
 from os import environ as env
 import sys
 
+from botocore.exceptions import ClientError
+import boto3
+from flask import flash
 import piecash
 from piecash import Transaction, Split, GnucashException
 
@@ -15,7 +19,8 @@ def get_env_var(name):
     try:
         env_var = env[name]
     except KeyError as ke:
-        logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
+        print(f'Could not get env. var. "{ke}". Make sure it is set')
+        sys.exit(1)
     else:
         return env_var
 
@@ -392,3 +397,122 @@ def delete_account_with_inheritance(book, acct_fullname):
     else:
         logger.error(f'Failed to delete account {acct_fullname}.')
         return False
+
+
+def get_scaleway_s3_client():
+    """Get a boto3 s3 client to use with Scaleway Object Storage."""
+    SCALEWAY_ACCESS_KEY_ID = get_env_var('SCALEWAY_ACCESS_KEY_ID')
+    SCALEWAY_SECRET_ACCESS_KEY = get_env_var('SCALEWAY_SECRET_ACCESS_KEY')
+
+    # static Scaleway settings (using NL region only)
+    S3_REGION_NAME = 'nl-ams'
+    S3_ENDPOINT_URL = 'https://s3.nl-ams.scw.cloud'
+
+    s3 = boto3.client('s3',
+                      region_name=S3_REGION_NAME,
+                      endpoint_url=S3_ENDPOINT_URL,
+                      aws_access_key_id=SCALEWAY_ACCESS_KEY_ID,
+                      aws_secret_access_key=SCALEWAY_SECRET_ACCESS_KEY
+                      )
+    return s3
+
+
+def download_gnucash_file_from_scaleway_s3(object_key, dest_path, bucket_name, s3_client):
+    """Download the .gnucash file from Scaleway S3 (Object Storage) to the destination path.
+
+       The s3_client object should be created using the function called
+       get_scaleway_s3_client().
+
+       The dest_path should be set to the fully qualified path where S3 will temporarily
+       store the GnuCash file.
+
+       The bucket_name param is the name of your Scaleway Object Storage bucket.
+
+       the object_key param  is the object key / name in Scaleway Object Storage.
+    """
+    global logger
+    try:
+        s3_client.download_file(Bucket=bucket_name,
+                                Key=object_key,
+                                Filename=dest_path
+                                )
+        logger.info(f'Successfully downloaded GnuCash file {object_key} from S3.')
+        return True
+    except ClientError as ce:
+        if ce.response['Error']['Code'] == 'NoSuchKey':
+            msg = 'Attempted to pull down GnuCash file from S3, but no such file.'
+        else:
+            msg = 'Attempted to pull down GnuCash file from S3, but unexpected error occurred: '
+            msg += ce.response['Error']['Code'] + ' ' + ce.response['Error']['Message']
+        logger.critical(msg)
+        return False
+    else:
+        return False
+
+
+def upload_gnucash_file_to_scaleway_s3(src_path, bucket_name, obj_key, s3_client):
+    """Upload a GnuCash file to Scaleway Object Storage."""
+    global logger
+    try:
+        s3_client.upload_file(Filename=src_path, Bucket=bucket_name, Key=obj_key)
+    except ClientError as ce:
+        msg = 'Failed to upload GnuCash file to S3 with error: '
+        msg += ce.response['Error']['Code'] + ' ' + ce.response['Error']['Message']
+        logger.critical(msg)
+        return False
+    else:
+        return True
+
+
+def delete_local_gnucash_file(file_path):
+    """Delete the local copy of a GnuCash file after uploading to Scaleway S3."""
+    global logger
+    try:
+        logger.info(f'Removing GnuCash file at path "{file_path}".')
+        os.remove(file_path)
+        return True
+    except OSError as ose:
+        msg = f'Failed to delete GnuCash file at path "{file_path}" with error:\n'
+        msg += ose
+        logger.error(msg)
+        return False
+
+
+def upload_gnucash_file_to_s3_and_delete_local(path_to_book,
+                                               book_name,
+                                               bucket_name,
+                                               s3_client):
+    """Upload GnuCash file to Scaleway S3 and delete the local copy.
+
+       Return a two-tuple of booleans where index 0 is True when upload succeeds
+       and where index 1 is True when deletion of local GnuCash file succeeds.
+       in the /entry endpoint. This is tight coupling, but the whole app is, so...
+    """
+    global logger
+    logger.info(f'Uploading GnuCash file {path_to_book} to Scaleway S3 bucket {bucket_name}.')
+    uploaded = upload_gnucash_file_to_scaleway_s3(path_to_book,
+                                                  bucket_name,
+                                                  book_name,
+                                                  s3_client)
+    if uploaded:
+        logger.info('Successfully uploaded GnuCash file to Scaleway S3.')
+        logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
+        if deleted := delete_local_gnucash_file(path_to_book):
+            logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
+            flash('Successfully saved GnuCash file to the cloud and cleaned up local data.',
+                  'success')
+        else:
+            logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
+            flash('Successfully saved GnuCash file to the cloud but failed to clean up local data.',
+                  'warning')
+    else:
+        logger.error('Failed to upload GnuCash file to Scaleway S3.')
+        logger.info(f'Attempting to delete local GnuCash file {path_to_book}.')
+        if deleted := delete_local_gnucash_file(path_to_book):
+            logger.info(f'Successfully deleted local GnuCash file {path_to_book}.')
+            flash('Failed to save GnuCash file to the cloud but successfully cleaned up local data',
+                  'danger')
+        else:
+            logger.error(f'Failed to delete local GnuCash file {path_to_book}.')
+            flash('Failed to save GnuCash file to the cloud and failed to clean up local data.',
+                  'danger')
