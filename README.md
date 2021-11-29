@@ -63,5 +63,13 @@ sudo docker run --reset unless-stopped -d -p 8000:8000 -e GNUCASH_DIR=/gnucash -
 ```bash
 sudo docker logs --follow <container_ID>
 ```
+
+Alternatively, you can use `docker-compose` to run the container with an Envfile.
+Use `Envfile.example` in this repo as a guide.
+Copy `Envfile.example` to a file named `Envfile`, and substitute your own values in for each variable.
+Once you've configured `Envfile`, you can run the container as follows:
+```bash
+docker-compose up -d
+```
 ## License
 This software is licensed under the `GNU Affero General Public License, Version 3`. Please see [LICENSE.md](https://github.com/bxbrenden/gnucash-helper/blob/main/LICENSE.md) or [The official site for this license](https://www.gnu.org/licenses/agpl-3.0.en.html) for more details.
