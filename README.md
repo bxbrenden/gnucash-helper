@@ -9,7 +9,7 @@ Once your GnuCash file is configured in the _real_ GnuCash, GnuCash Helper can b
 ### Scaleway Object Storage
 [Scaleway](https://www.scaleway.com/en/) is a cloud provider that offers services in France, Netherlands, and Poland.
 In order to use `gnucash-helper` as-is, you will need to have a Scaleway account.
-Starting in version `0.4.6`, `gnucash-helper` uses [Scaleway Object Storage](https://www.scaleway.com/en/object-storage/) (S3-compatible) to store its `.gnucash` files.
+Starting in version `0.5.0`, `gnucash-helper` uses [Scaleway Object Storage](https://www.scaleway.com/en/object-storage/) (S3-compatible) to store its `.gnucash` files.
 Using an S3 backend simplifies deployment because S3 serves as a single source of truth for the latest version of the file.
 I realize it's not ideal for a FLOSS project to depend on a cloud provider, but managing Syncthing was proving too tiresome.
 

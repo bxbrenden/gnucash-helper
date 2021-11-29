@@ -1,7 +1,7 @@
 ---
 services:
   gnucash-helper:
-    image: bxbrenden/gnucash-helper:0.4.6
+    image: bxbrenden/gnucash-helper:0.5.0
     ports:
       - target: 8000
         published: 8000
