@@ -26,7 +26,7 @@ from wtforms import DecimalField,\
                     SubmitField,\
                     TextAreaField,\
                     StringField
-from wtforms.fields.html5 import DateField
+from wtforms.fields import DateField
 from wtforms.validators import DataRequired
 
 book_name = get_book_name_from_env()
