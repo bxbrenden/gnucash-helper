@@ -26,7 +26,7 @@ from wtforms import DecimalField,\
                     SubmitField,\
                     TextAreaField,\
                     StringField
-from wtforms.fields import DateTimeField
+from wtforms.fields import DateField
 from wtforms.validators import DataRequired
 
 book_name = get_book_name_from_env()
@@ -54,8 +54,8 @@ class TransactionForm(FlaskForm):
                           rounding=ROUND_HALF_UP,
                           render_kw={'placeholder': 'Ex: 4.20'})
     description = TextAreaField('Description', validators=[DataRequired()])
-    date = DateTimeField('Date',
-                         validators=[DataRequired()])
+    date = DateField('Date',
+                     validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     @classmethod
