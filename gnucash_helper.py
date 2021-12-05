@@ -176,6 +176,9 @@ def last_n_transactions(book, n=50):
         transactions = [x for x in reversed(book.transactions[-n:])]
     elif n == 0:
         transactions = [x for x in reversed(book.transactions)]
+
+    # Sort transactions by date
+    transactions.sort(key=lambda x: x.enter_date)
     logger.debug(f'`n` was set to {n} for getting last transactions')
     logger.debug(f'There are {len(transactions)} transactions in the list')
 
