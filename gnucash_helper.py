@@ -28,7 +28,8 @@ def get_env_var(name):
 def configure_logging():
     """Set up logging for the module."""
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    log_level = os.environ.get('GNUCASH_LOG_LEVEL') or logging.INFO
+    logger.setLevel(log_level)
     formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
