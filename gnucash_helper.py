@@ -224,12 +224,13 @@ def last_n_transactions(book, n=50):
     return last_n
 
 
-def add_transaction(book, description, amount, debit_acct, credit_acct):
+def add_transaction(book, description, amount, debit_acct, credit_acct, enter_datetime):
     """Add a transaction to an existing book.
 
     `amount` should be a float out to 2 decimal places for the value of the transaction.
     `debit_acct` and `credit_acct` should be the names of the accounts as given by the .fullname
     method from a GnuCash Account, e.g. book.accounts.get(fullname="Expenses:Food").
+    `enter_datetime` should be of type datetime.datetime.
     """
     try:
         credit = get_account(credit_acct, book)
@@ -239,6 +240,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
             logger.info('Creating a new transaction in the GnuCash book.')
             transaction = Transaction(currency=usd,
                                       description=description,
+                                      enter_date=enter_datetime,
                                       splits=[
                                           Split(value=amount, account=credit),
                                           Split(value=-amount, account=debit)

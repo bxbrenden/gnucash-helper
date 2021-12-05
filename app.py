@@ -13,7 +13,7 @@ from gnucash_helper import list_accounts,\
                            get_scaleway_s3_client,\
                            download_gnucash_file_from_scaleway_s3,\
                            upload_gnucash_file_to_s3_and_delete_local
-
+from datetime import datetime
 from decimal import ROUND_HALF_UP
 import os
 from os import environ as env
@@ -190,7 +190,11 @@ def entry():
         amount = form.amount.data
         credit = form.credit.data
         debit = form.debit.data
-        added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
+        date = form.date.data
+        time = datetime.utcnow().time()
+        enter_datetime = datetime.combine(date, time)
+
+        added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit, enter_datetime)
         gnucash_book.close()
 
         # Upload the GnuCash book to Scaleway S3 and delete local copy
