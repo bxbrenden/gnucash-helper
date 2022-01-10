@@ -13,7 +13,7 @@ def configure_logging():
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
     ch.setFormatter(formatter)
     fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
     fh.setLevel(logging.DEBUG)
@@ -218,11 +218,12 @@ def last_n_transactions(book, n=50):
     return last_n
 
 
-def add_transaction(book, description, amount, debit_acct, credit_acct):
+def add_transaction(book, description, amount, debit_acct, credit_acct, enter_datetime):
     """Add a transaction to an existing book.
 
     `amount` should be a float out to 2 decimal places for the value of the transaction.
     `debit_acct` and `credit_acct` should be the names of the accounts as given by the .fullname
+    `enter_datetime` should be of type datetime.datetime.
     method from a GnuCash Account, e.g. book.accounts.get(fullname="Expenses:Food").
     """
     try:
@@ -232,6 +233,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
             usd = book.currencies(mnemonic='USD')
             logger.info('Creating a new transaction in the GnuCash book.')
             transaction = Transaction(currency=usd,
+                                      enter_date=enter_datetime,
                                       description=description,
                                       splits=[
                                           Split(value=amount, account=credit),
