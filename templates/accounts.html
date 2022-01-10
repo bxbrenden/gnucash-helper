@@ -3,6 +3,10 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %} gnucash-helper  {% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='accounts.css')  }}">
+{% endblock %}
 {% block page_content %}
 <div class="page-header">
   <h1>Manage Accounts</h1>
