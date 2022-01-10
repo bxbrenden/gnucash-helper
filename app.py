@@ -11,6 +11,7 @@ from gnucash_helper import list_accounts,\
                            delete_account_with_inheritance,\
                            add_account
 
+from datetime import datetime
 from decimal import ROUND_HALF_UP
 import os
 from os import environ as env
@@ -23,6 +24,8 @@ from wtforms import DecimalField,\
                     SubmitField,\
                     TextAreaField,\
                     StringField
+
+from wtforms.fields import DateField
 
 from wtforms.validators import DataRequired
 
@@ -46,6 +49,8 @@ class TransactionForm(FlaskForm):
                           rounding=ROUND_HALF_UP,
                           render_kw={'placeholder': 'Ex: 4.20'})
     description = TextAreaField('Description', validators=[DataRequired()])
+    date = DateField('Date',
+                     validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     @classmethod
@@ -158,7 +163,11 @@ def entry():
         amount = form.amount.data
         credit = form.credit.data
         debit = form.debit.data
-        added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit)
+        date = form.date.data
+        time = datetime.utcnow().time()
+        enter_datetime = datetime.combine(date, time)
+
+        added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit, enter_datetime)
         gnucash_book.close()
 
         if added_txn:
