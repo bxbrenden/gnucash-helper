@@ -44,6 +44,15 @@ def get_env_var(name):
         return env_var
 
 
+def get_easy_button_values():
+    """Get all the account names for easy buttons."""
+    btns = {}
+    btns['foodDebit'] = 'Assets:Current Assets:Cash in Wallet'
+    btns['foodCredit'] = 'Expenses:Dining'
+
+    return btns
+
+
 def get_book_name_from_env():
     """Get the GnuCash book name from an environment variable."""
     try:

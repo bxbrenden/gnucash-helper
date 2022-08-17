@@ -2,6 +2,7 @@
 
 {% import "bootstrap/wtf.html" as wtf %}
 
+
 {% block title %} gnucash-helper  {% endblock %}
 {% block styles %}
 {{ super() }}
@@ -11,5 +12,8 @@
 <div class="page-header">
   <h1>Enter a Transaction</h1>
 </div>
+<img src="{{ url_for('static', filename='pizza.png') }}" id="easy-btn-food" alt="Pizza icon / button for quick food expense entries">
 {{ wtf.quick_form(form) }}
+<script src="{{ url_for('static', filename='easy-buttons.js') }}"></script>
+<script type=text/javascript>var easyButtons = getEasyButtons({{ easy_btns|tojson  }})</script>
 {% endblock %}

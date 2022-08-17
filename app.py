@@ -9,7 +9,8 @@ from gnucash_helper import list_accounts,\
                            summarize_transaction,\
                            delete_transaction,\
                            delete_account_with_inheritance,\
-                           add_account
+                           add_account,\
+                           get_easy_button_values
 
 from datetime import datetime
 from decimal import ROUND_HALF_UP
@@ -154,6 +155,8 @@ def index():
 def entry():
     global logger
     logger.info('Creating new form inside of the /entry route')
+    easy_btns = get_easy_button_values()
+    print(f"easy buttons are: {easy_btns}")
     form = TransactionForm.new()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
@@ -178,7 +181,7 @@ def entry():
                   'danger')
 
         return redirect(url_for('entry'))
-    return render_template('entry.html', form=form)
+    return render_template('entry.html', form=form, easy_btns=easy_btns)
 
 
 @app.route('/delete', methods=['GET', 'POST'])
