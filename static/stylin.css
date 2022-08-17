@@ -1,17 +1,39 @@
+* {
+  color: #dcdcdc;
+}
+
 html, body {
-  background-color: #fcfcfc;
+  background-color: #252525;
+}
+
+.form-control {
+  color: #dcdcdc;
+  background-color: #505050;
+}
+
+.btn-default {
+  font-weight: bold;
+  background-color: #f57d4a;
+  border: 1px solid black;
+}
+
+.btn-default:hover {
+  font-weight: bold;
+  background-color: #ea4f36;
+  border: 1px solid black;
 }
 
 th {
-  background-color: #94b484;
+  background-color: #cd683d;
+  color: black;
 }
 
 tr.evenrow {
-  background-color: #f4fcdc;
+  background-color: #343434;
 }
 
 tr.oddrow {
-  background-color: #bcdcbc;
+  background-color: #505050;
 }
 
 .logo {
