@@ -14,25 +14,52 @@ function getEasyButtons(buttons) {
   return buttons
 }
 
-function easyFoodTransaction() {
-  sourceAccount = document.getElementById('debit');
-  //sourceAccount.value = "Assets:Current Assets:Cash in Wallet";
-  sourceAccount.value = easyButtons.foodDebit;
+function easyTransaction(evt) {
+  let txnType = evt.currentTarget.txnType;
+  let sourceAccount = document.getElementById('debit');
+  let destAccount = document.getElementById('credit');
+  let dateBox = document.getElementById('date');
+  let descripBox = document.getElementById('description');
+  let amountBox = document.getElementById('amount');
 
-  destAccount = document.getElementById('credit');
-  destAccount.value = "Expenses:Dining";
+  let eb = easyButtons;
 
-  dateBox = document.getElementById('date');
+  if (txnType === 'food') {
+    sourceAccount.value = eb['food']['source'];
+    destAccount.value = eb['food']['dest'];
+    descripBox.value = eb['food']['descrip'];
+  } else if (txnType === 'fun') {
+    sourceAccount.value = eb['fun']['source'];
+    destAccount.value = eb['fun']['dest'];
+    descripBox.value = eb['fun']['descrip'];
+  } else if (txnType === 'cats') {
+    sourceAccount.value = eb['cats']['source'];
+    destAccount.value = eb['cats']['dest'];
+    descripBox.value = eb['cats']['descrip'];
+  } else if (txnType === 'misc') {
+    sourceAccount.value = eb['misc']['source'];
+    destAccount.value = eb['misc']['dest'];
+    descripBox.value = eb['misc']['descrip'];
+  }
+
   dateBox.value = getTodaysDate();
-
-  descripBox = document.getElementById('description');
-  descripBox.value = "Quick food purchase 🍕";
-
-  amountBox = document.getElementById('amount');
   amountBox.focus()
 }
 
 window.addEventListener('load', (event) => {
   const foodButton = document.getElementById('easy-btn-food');
-  foodButton.addEventListener("click", easyFoodTransaction, false);
+  foodButton.addEventListener("click", easyTransaction, false);
+  foodButton.txnType = 'food'
+
+  const funButton = document.getElementById('easy-btn-fun');
+  funButton.addEventListener("click", easyTransaction, false);
+  funButton.txnType = 'fun'
+
+  const catsButton = document.getElementById('easy-btn-cats');
+  catsButton.addEventListener("click", easyTransaction, false);
+  catsButton.txnType = 'cats'
+
+  const miscButton = document.getElementById('easy-btn-misc');
+  miscButton.addEventListener("click", easyTransaction, false);
+  miscButton.txnType = 'misc'
 })
