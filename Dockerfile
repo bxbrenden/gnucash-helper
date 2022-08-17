@@ -17,6 +17,7 @@ COPY templates/ templates/
 COPY static/ static/
 ADD gnucash_helper.py gnucash_helper.py
 ADD app.py app.py
+COPY easy-buttons-example.yml easy-buttons.yml
 
 EXPOSE 8000
 
