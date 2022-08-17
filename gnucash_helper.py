@@ -1,6 +1,7 @@
 """Utility functions for GnuCash Helper."""
 import logging
 from os import environ as env
+import yaml
 import sys
 
 import piecash
@@ -45,12 +46,30 @@ def get_env_var(name):
 
 
 def get_easy_button_values():
-    """Get all the account names for easy buttons."""
-    btns = {}
-    btns['foodDebit'] = 'Assets:Current Assets:Cash in Wallet'
-    btns['foodCredit'] = 'Expenses:Dining'
+    """Get all the config info for easy buttons."""
+    global logger
+    easy_config_dir = env.get('EASY_CONFIG_DIR', '/app')
+    try:
+        with open(f'{easy_config_dir}/easy-buttons.yml', 'r') as easy:
+            btns = yaml.safe_load(easy)
 
-    return btns
+            return btns
+
+    except FileNotFoundError:
+        err = 'Failed to find easy button config. file. '
+        err += f'Expected to find it at {easy_config_dir}/easy-buttons.yml'
+        logger.critical(err)
+        raise SystemExit()
+    except PermissionError:
+        err = f'Tried to open easy button config at {easy_config_dir}/'
+        err += 'easy-buttons.yml, but permission denied.'
+        logger.critical(err)
+        raise SystemExit()
+    except yaml.YAMLError as exc:
+        err = 'Failed to parse easy button config yaml file with error:\n'
+        err += exc
+        logger.critical(err)
+        raise SystemExit()
 
 
 def get_book_name_from_env():
