@@ -15,7 +15,11 @@ def configure_logging():
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     ch.setFormatter(formatter)
-    fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
+    try:
+        log_dir = env['GCH_LOG_DIR']
+        fh = logging.FileHandler(f'{log_dir}/gnucash-helper.log', encoding='utf-8')
+    except KeyError:
+        fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
@@ -353,7 +357,7 @@ def get_highest_ancestor_acct(book, account_name, join_at_index=1):
         if test_account.placeholder == 0:
             return test_account
         elif test_account.placeholder == 1:
-            return get_highest_ancestor_acct(book, account_name, join_at_index+1)
+            return get_highest_ancestor_acct(book, account_name, join_at_index + 1)
     else:
         logger.error(f'No account by the name of {test_account} was found in book {book}.')
 
