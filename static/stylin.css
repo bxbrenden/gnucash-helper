@@ -27,15 +27,15 @@ h4 {
   border: 1px solid black;
 }
 
-#easy-btn-food {
+.easy-btn {
+  display: inline;
   font-size: 2em;
   margin-bottom: 10px;
   background-color: #505050;
   border: 1px solid #cccccc;
-  display: inline;
 }
 
-#easy-btn-food:hover {
+.easy-btn:hover {
   background-color: #dcdcdc;
 }
 
