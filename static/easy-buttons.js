@@ -24,23 +24,14 @@ function easyTransaction(evt) {
 
   let eb = easyButtons;
 
-  if (txnType === 'food') {
-    sourceAccount.value = eb['food']['source'];
-    destAccount.value = eb['food']['dest'];
-    descripBox.value = eb['food']['descrip'];
-  } else if (txnType === 'fun') {
-    sourceAccount.value = eb['fun']['source'];
-    destAccount.value = eb['fun']['dest'];
-    descripBox.value = eb['fun']['descrip'];
-  } else if (txnType === 'cats') {
-    sourceAccount.value = eb['cats']['source'];
-    destAccount.value = eb['cats']['dest'];
-    descripBox.value = eb['cats']['descrip'];
-  } else if (txnType === 'misc') {
-    sourceAccount.value = eb['misc']['source'];
-    destAccount.value = eb['misc']['dest'];
-    descripBox.value = eb['misc']['descrip'];
+  txnTypes = ['food', 'cats', 'misc', 'alcohol', 'fun']
+  if (txnTypes.includes(txnType) === false) {
+    console.log(`The specified transaction type ${txnType} is unknown`)
   }
+
+  sourceAccount.value = eb[txnType]['source']
+  destAccount.value = eb[txnType]['dest']
+  descripBox.value = eb[txnType]['descrip']
 
   dateBox.value = getTodaysDate();
   amountBox.focus()
@@ -50,6 +41,10 @@ window.addEventListener('load', (event) => {
   const foodButton = document.getElementById('easy-btn-food');
   foodButton.addEventListener("click", easyTransaction, false);
   foodButton.txnType = 'food'
+
+  const alcoholButton = document.getElementById('easy-btn-alcohol');
+  alcoholButton.addEventListener("click", easyTransaction, false);
+  alcoholButton.txnType = 'alcohol'
 
   const funButton = document.getElementById('easy-btn-fun');
   funButton.addEventListener("click", easyTransaction, false);
