@@ -12,6 +12,7 @@ ipython = "*"
 ipython-genutils = "*"
 piecash = "==1.2.0"
 PyYAML = "==6.0"
+voluptuous = "*"
 
 [dev-packages]
 

@@ -6,6 +6,7 @@ import sys
 
 import piecash
 from piecash import Transaction, Split, GnucashException
+from voluptuous import Schema, Required, All, Length, MultipleInvalid
 
 
 def configure_logging():
@@ -45,6 +46,25 @@ def get_env_var(name):
         return env_var
 
 
+def validate_easy_button_schema(btns):
+    """Given a dictionary of easy buttons, validate the schema and return True if valid else False."""
+    global logger
+    schema = Schema({Required(All(str, Length(min=1))): {Required('source'): All(str, Length(min=1)),
+                     Required('dest'): All(str, Length(min=1)),
+                     Required('descrip'): All(str, Length(min=1)),
+                     Required('emoji'): All(str, Length(min=1, max=1))}})
+
+    # Validate each button definition individually from easy-buttons.yml
+    for k, v in btns.items():
+        try:
+            schema({k: v})
+        except MultipleInvalid as invalid:
+            logger.error(f'Easy Button schema validation failed: The button dict "{k}:{v}" failed with error: {invalid}')
+            return False
+
+    return True
+
+
 def get_easy_button_values():
     """Get all the config info for easy buttons."""
     global logger
@@ -53,7 +73,8 @@ def get_easy_button_values():
         with open(f'{easy_config_dir}/easy-buttons.yml', 'r') as easy:
             btns = yaml.safe_load(easy)
 
-            return btns
+            if validate_easy_button_schema(btns):
+                return btns
 
     except FileNotFoundError:
         err = 'Failed to find easy button config. file. '
