@@ -20,4 +20,13 @@
 {{ wtf.quick_form(form) }}
 <script src="{{ url_for('static', filename='easy-buttons.js') }}"></script>
 <script type=text/javascript>var easyButtons = getEasyButtons({{ easy_btns|tojson  }})</script>
+<script type=text/javascript>
+  window.addEventListener('load', (event) => {
+  {% for btn_type in easy_btns %}
+      const {{ btn_type }}Button = document.getElementById("easy-btn-{{ btn_type  }}");
+      {{ btn_type }}Button.addEventListener("click", easyTransaction, false);
+      {{ btn_type }}Button.txnType = "{{ btn_type }}"
+  {% endfor %}
+  });
+</script>
 {% endblock %}

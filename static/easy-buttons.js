@@ -36,25 +36,3 @@ function easyTransaction(evt) {
   dateBox.value = getTodaysDate();
   amountBox.focus()
 }
-
-window.addEventListener('load', (event) => {
-  const foodButton = document.getElementById('easy-btn-food');
-  foodButton.addEventListener("click", easyTransaction, false);
-  foodButton.txnType = 'food'
-
-  const alcoholButton = document.getElementById('easy-btn-alcohol');
-  alcoholButton.addEventListener("click", easyTransaction, false);
-  alcoholButton.txnType = 'alcohol'
-
-  const funButton = document.getElementById('easy-btn-fun');
-  funButton.addEventListener("click", easyTransaction, false);
-  funButton.txnType = 'fun'
-
-  const catsButton = document.getElementById('easy-btn-cats');
-  catsButton.addEventListener("click", easyTransaction, false);
-  catsButton.txnType = 'cats'
-
-  const miscButton = document.getElementById('easy-btn-misc');
-  miscButton.addEventListener("click", easyTransaction, false);
-  miscButton.txnType = 'misc'
-})
