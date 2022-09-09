@@ -13,11 +13,10 @@
   <h1>Enter a Transaction</h1>
 </div>
 <h4>Quick Transactions</h4>
-<input class="btn btn-default easy-btn" id="easy-btn-food" name="easy-btn-food" type="submit" value="🍕" title="Food">
-<input class="btn btn-default easy-btn" id="easy-btn-alcohol" name="easy-btn-alcohol" type="submit" value="🍸" title="Alcohol">
-<input class="btn btn-default easy-btn" id="easy-btn-fun" name="easy-btn-fun" type="submit" value="🎡" title="Fun">
-<input class="btn btn-default easy-btn" id="easy-btn-cats" name="easy-btn-cats" type="submit" value="😾" title="Cat Food">
-<input class="btn btn-default easy-btn" id="easy-btn-misc" name="easy-btn-misc" type="submit" value="🤷" title="Misc.">
+{% for btn_type, vals in easy_btns.items() %}
+<input class="btn btn-default easy-btn" id="easy-btn-{{ btn_type }}"
+                                        name="easy-btn-{{ btn_type }}" type="submit" value="{{ vals['emoji'] }}" title="{{ btn_type|capitalize }}">
+{% endfor %}
 {{ wtf.quick_form(form) }}
 <script src="{{ url_for('static', filename='easy-buttons.js') }}"></script>
 <script type=text/javascript>var easyButtons = getEasyButtons({{ easy_btns|tojson  }})</script>
