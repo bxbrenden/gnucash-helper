@@ -12,9 +12,9 @@ mkdir -p $GCH_LOG_DIR
 if [ ! -f $GCH_DEV/demo-budget.gnucash ]; then
     cp ~/git/gnucash-helper/demo-budget.gnucash $GCH_DEV
 fi
-if [ ! -f $EASY_CONFIG_DIR/easy-buttons.yml ]; then
-    cp ~/Sync/easy-buttons.yml $EASY_CONFIG_DIR/easy-buttons.yml
-fi
+# if [ ! -f $EASY_CONFIG_DIR/easy-buttons.yml ]; then
+#     cp ~/Sync/easy-buttons.yml $EASY_CONFIG_DIR/easy-buttons.yml
+# fi
 touch $GCH_LOG_DIR/gnucash-helper.log
 export GNUCASH_DIR=$GCH_DEV
 export GNUCASH_FILE=demo-budget.gnucash

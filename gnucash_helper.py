@@ -57,19 +57,19 @@ def get_easy_button_values():
 
     except FileNotFoundError:
         err = 'Failed to find easy button config. file. '
-        err += f'Expected to find it at {easy_config_dir}/easy-buttons.yml'
-        logger.critical(err)
-        raise SystemExit()
+        err += f'Expected to find it at {easy_config_dir}/easy-buttons.yml.\n'
+        err += 'This session will not use easy buttons.'
+        logger.error(err)
     except PermissionError:
         err = f'Tried to open easy button config at {easy_config_dir}/'
-        err += 'easy-buttons.yml, but permission denied.'
-        logger.critical(err)
-        raise SystemExit()
+        err += 'easy-buttons.yml, but permission denied.\n'
+        err += 'This session will not use easy buttons.'
+        logger.error(err)
     except yaml.YAMLError as exc:
-        err = 'Failed to parse easy button config yaml file with error:\n'
-        err += exc
-        logger.critical(err)
-        raise SystemExit()
+        err = 'Failed to parse easy button config yaml file.\n'
+        err += 'This session will not use easy buttons.\n'
+        err += f'The error was:\n{exc}'
+        logger.error(err)
 
 
 def get_book_name_from_env():
