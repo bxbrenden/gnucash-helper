@@ -33,13 +33,8 @@ from wtforms.validators import DataRequired
 book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
 path_to_book = gnucash_dir + '/' + book_name
-s3_bucket_name = get_env_var('SCALEWAY_S3_BUCKET')
-s3_client = get_scaleway_s3_client()
-book_downloaded = download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client)
 book_exists = os.path.exists(path_to_book)
-if not book_exists:
-    logger.critical(f'The file "{path_to_book}" does not exist, so gnucash-helper cannot start.')
-    raise SystemExit
+logger.info(f'At the global start, the book\'s existence is: {book_exists}')
 
 
 class TransactionForm(FlaskForm):
@@ -62,13 +57,8 @@ class TransactionForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new TransactionForm."""
-        global logger, path_to_book, book_name, s3_client, s3_bucket_name
-        logger.info(f'Attempting to download GnuCash file {book_name} from Scaleway S3.')
-        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
-            logger.info('Successfully downloaded GnuCash file from S3 for /entry.')
-        else:
-            logger.critical('Failed to download GnuCash file from S3 for /entry.')
-            raise SystemExit
+        global path_to_book
+        global logger
         logger.info('Attempting to read GnuCash book to create TransactionForm.')
         accounts = list_accounts(path_to_book)
         txn_form = cls()
@@ -87,13 +77,8 @@ class DeleteTransactionForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new DeleteTransactionForm."""
-        global logger, path_to_book, book_name, s3_client, s3_bucket_name
-        logger.info('Attempting to download GnuCash file from Scaleway S3 for /delete.')
-        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
-            logger.info('Successfully downloaded GnuCash file for /delete.')
-        else:
-            logger.critical('Failed to download GnuCash file for /delete.')
-            raise SystemExit
+        global path_to_book
+        global logger
         logger.info('Attempting to read GnuCash book to create DeleteTransactionForm.')
         book = open_book(path_to_book)
         transactions = last_n_transactions(book, 0)
@@ -118,14 +103,8 @@ class DeleteAccountForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new DeleteAccountForm."""
-        global logger, path_to_book, book_name, s3_client, s3_bucket_name
-        logger.info('Attempting to download GnuCash file for /accounts.')
-        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
-            logger.info('Successfully downloaded GnuCash file for /accounts.')
-        else:
-            logger.critical('Failed to download GnuCash file for /accounts.')
-            raise SystemExit
-
+        global path_to_book
+        global logger
         logger.info('Attempting to read GnuCash book to create DeleteAccountForm.')
         book = open_book(path_to_book)
         account_names = sorted([acc.fullname for acc in book.accounts])
@@ -147,14 +126,8 @@ class AddAccountForm(FlaskForm):
     @classmethod
     def new(cls):
         """Instantiate a new AddAccountForm."""
-        global logger, path_to_book, book_name, s3_client, s3_bucket_name
-        logger.info('Attempting to download GnuCash file for /accounts.')
-        if downloaded := download_gnucash_file_from_scaleway_s3(book_name, path_to_book, s3_bucket_name, s3_client):
-            logger.info('Successfully downloaded GnuCash file for /accounts.')
-        else:
-            logger.critical('Failed to download GnuCash file for /accounts.')
-            raise SystemExit
-
+        global path_to_book
+        global logger
         logger.info('Attempting to read GnuCash book to create AddAccountForm.')
         book = open_book(path_to_book)
         account_names = sorted([acc.fullname for acc in book.accounts])
@@ -180,7 +153,7 @@ def index():
 
 @app.route('/entry', methods=['GET', 'POST'])
 def entry():
-    global logger, path_to_book, s3_bucket_name, s3_client, book_name
+    global logger
     logger.info('Creating new form inside of the /entry route')
     easy_btns = get_easy_button_values()
     print(f"easy buttons are: {easy_btns}")
@@ -200,21 +173,20 @@ def entry():
         added_txn = add_transaction(gnucash_book, descrip, amount, debit, credit, enter_datetime)
         gnucash_book.close()
 
-        # Upload the GnuCash book to Scaleway S3 and delete local copy
         if added_txn:
-            upload_gnucash_file_to_s3_and_delete_local(path_to_book,
-                                                       book_name,
-                                                       s3_bucket_name,
-                                                       s3_client)
+            flash(f'Transaction for {float(amount):.2f} saved to GnuCash file.',
+                  'success')
         else:
-            flash('Failed to add transaction to GnuCash book', 'danger')
+            flash(f'Transaction for {float(amount):.2f} was not saved to GnuCash file.',
+                  'danger')
+
         return redirect(url_for('entry'))
     return render_template('entry.html', form=form, easy_btns=easy_btns)
 
 
 @app.route('/delete', methods=['GET', 'POST'])
 def delete():
-    global logger, path_to_book, book_name, s3_client, s3_bucket_name
+    global logger
     logger.info('Creating new form inside of the /delete route')
     form = DeleteTransactionForm.new()
     if form.validate_on_submit():
@@ -226,7 +198,9 @@ def delete():
         gnucash_book.close()
 
         if txn_deleted:
-            upload_gnucash_file_to_s3_and_delete_local(path_to_book, book_name, s3_bucket_name, s3_client)
+            message = 'Transaction deleted from GnuCash file:\n'
+            message += txn_to_delete
+            flash(message, 'success')
         else:
             message = 'Transaction was NOT deleted from GnuCash file:\n'
             message += txn_to_delete
@@ -251,7 +225,9 @@ def accounts():
         gnucash_book.close()
 
         if acc_deleted:
-            upload_gnucash_file_to_s3_and_delete_local(path_to_book, book_name, s3_bucket_name, s3_client)
+            message = 'Account deleted from GnuCash file:\n'
+            message += acc_to_delete
+            flash(message, 'success')
         else:
             message = 'Account was NOT deleted from GnuCash file:\n'
             message += acc_to_delete
@@ -267,7 +243,8 @@ def accounts():
         gnucash_book.close()
 
         if acc_added:
-            upload_gnucash_file_to_s3_and_delete_local(path_to_book, book_name, s3_bucket_name, s3_client)
+            message = f'Account "{acc_to_add}" added to GnuCash file:\n'
+            flash(message, 'success')
         else:
             message = f'Account "{acc_to_add}" was NOT added to GnuCash file:\n'
             flash(message, 'danger')
