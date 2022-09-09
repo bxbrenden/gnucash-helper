@@ -24,11 +24,6 @@ function easyTransaction(evt) {
 
   let eb = easyButtons;
 
-  txnTypes = ['food', 'cats', 'misc', 'alcohol', 'fun']
-  if (txnTypes.includes(txnType) === false) {
-    console.log(`The specified transaction type ${txnType} is unknown`)
-  }
-
   sourceAccount.value = eb[txnType]['source']
   destAccount.value = eb[txnType]['dest']
   descripBox.value = eb[txnType]['descrip']
