@@ -2,6 +2,7 @@
 import logging
 import os
 from os import environ as env
+import yaml
 import sys
 
 from botocore.exceptions import ClientError
@@ -32,19 +33,62 @@ def configure_logging():
     logger.setLevel(log_level)
     formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s:%(message)s')
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
     ch.setFormatter(formatter)
-    if gnucash_dir := get_env_var('GNUCASH_DIR'):
-        fh = logging.FileHandler(f'{gnucash_dir}/gnucash-helper.log', encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
+    try:
+        log_dir = env['GCH_LOG_DIR']
+        fh = logging.FileHandler(f'{log_dir}/gnucash-helper.log', encoding='utf-8')
+    except KeyError:
+        fh = logging.FileHandler('/app/gnucash-helper.log', encoding='utf-8')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
     logger.addHandler(ch)
 
     return logger
 
 
 logger = configure_logging()
+
+
+def get_env_var(name):
+    """Get the environment variable `name` from environment variable.
+
+    Return the value of the `name` env var if found, None otherwise.
+    """
+    try:
+        env_var = env[name]
+    except KeyError as ke:
+        logger.critical(f'Could not get env. var. "{ke}". Make sure it is set')
+    else:
+        return env_var
+
+
+def get_easy_button_values():
+    """Get all the config info for easy buttons."""
+    global logger
+    easy_config_dir = env.get('EASY_CONFIG_DIR', '/app')
+    try:
+        with open(f'{easy_config_dir}/easy-buttons.yml', 'r') as easy:
+            btns = yaml.safe_load(easy)
+
+            return btns
+
+    except FileNotFoundError:
+        err = 'Failed to find easy button config. file. '
+        err += f'Expected to find it at {easy_config_dir}/easy-buttons.yml.\n'
+        err += 'This session will not use easy buttons.'
+        logger.error(err)
+    except PermissionError:
+        err = f'Tried to open easy button config at {easy_config_dir}/'
+        err += 'easy-buttons.yml, but permission denied.\n'
+        err += 'This session will not use easy buttons.'
+        logger.error(err)
+    except yaml.YAMLError as exc:
+        err = 'Failed to parse easy button config yaml file.\n'
+        err += 'This session will not use easy buttons.\n'
+        err += f'The error was:\n{exc}'
+        logger.error(err)
 
 
 def get_book_name_from_env():
@@ -177,7 +221,6 @@ def last_n_transactions(book, n=50):
         transactions = [x for x in reversed(book.transactions[-n:])]
     elif n == 0:
         transactions = [x for x in reversed(book.transactions)]
-
     # Sort transactions by date
     transactions.sort(key=lambda x: x.enter_date, reverse=True)
     logger.debug(f'`n` was set to {n} for getting last transactions')
@@ -233,6 +276,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct, enter_da
 
     `amount` should be a float out to 2 decimal places for the value of the transaction.
     `debit_acct` and `credit_acct` should be the names of the accounts as given by the .fullname
+    `enter_datetime` should be of type datetime.datetime.
     method from a GnuCash Account, e.g. book.accounts.get(fullname="Expenses:Food").
     `enter_datetime` should be of type datetime.datetime.
     """
@@ -243,6 +287,7 @@ def add_transaction(book, description, amount, debit_acct, credit_acct, enter_da
             usd = book.currencies(mnemonic='USD')
             logger.info('Creating a new transaction in the GnuCash book.')
             transaction = Transaction(currency=usd,
+                                      enter_date=enter_datetime,
                                       description=description,
                                       enter_date=enter_datetime,
                                       splits=[
@@ -361,7 +406,7 @@ def get_highest_ancestor_acct(book, account_name, join_at_index=1):
         if test_account.placeholder == 0:
             return test_account
         elif test_account.placeholder == 1:
-            return get_highest_ancestor_acct(book, account_name, join_at_index+1)
+            return get_highest_ancestor_acct(book, account_name, join_at_index + 1)
     else:
         logger.error(f'No account by the name of {test_account} was found in book {book}.')
 

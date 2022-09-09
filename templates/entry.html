@@ -2,10 +2,35 @@
 
 {% import "bootstrap/wtf.html" as wtf %}
 
+
 {% block title %} gnucash-helper  {% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='entry.css')  }}">
+{% endblock %}
 {% block page_content %}
 <div class="page-header">
   <h1>Enter a Transaction</h1>
 </div>
+{% if easy_btns%}
+<h4>Quick Transactions</h4>
+{% for btn_type, vals in easy_btns.items() %}
+<input class="btn btn-default easy-btn" id="easy-btn-{{ btn_type }}"
+                                        name="easy-btn-{{ btn_type }}" type="submit" value="{{ vals['emoji'] }}" title="{{ btn_type|capitalize }}">
+{% endfor %}
+{% endif %}
 {{ wtf.quick_form(form) }}
+<script src="{{ url_for('static', filename='easy-buttons.js') }}"></script>
+<script type=text/javascript>var easyButtons = getEasyButtons({{ easy_btns|tojson  }})</script>
+{% if easy_btns %}
+<script type=text/javascript>
+  window.addEventListener('load', (event) => {
+  {% for btn_type in easy_btns %}
+      const {{ btn_type }}Button = document.getElementById("easy-btn-{{ btn_type  }}");
+      {{ btn_type }}Button.addEventListener("click", easyTransaction, false);
+      {{ btn_type }}Button.txnType = "{{ btn_type }}"
+  {% endfor %}
+  });
+</script>
+{% endif %}
 {% endblock %}

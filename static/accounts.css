@@ -1,8 +1,4 @@
-body, html {
-  background-repeat: no-repeat;
-}
-
-h1, h2, h3 {
+h1 {
   margin: auto;
   max-width: 50%;
   text-align: center;

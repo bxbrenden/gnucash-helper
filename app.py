@@ -10,9 +10,8 @@ from gnucash_helper import list_accounts,\
                            delete_transaction,\
                            delete_account_with_inheritance,\
                            add_account,\
-                           get_scaleway_s3_client,\
-                           download_gnucash_file_from_scaleway_s3,\
-                           upload_gnucash_file_to_s3_and_delete_local
+                           get_easy_button_values
+
 from datetime import datetime
 from decimal import ROUND_HALF_UP
 import os
@@ -26,7 +25,9 @@ from wtforms import DecimalField,\
                     SubmitField,\
                     TextAreaField,\
                     StringField
+
 from wtforms.fields import DateField
+
 from wtforms.validators import DataRequired
 
 book_name = get_book_name_from_env()
@@ -181,6 +182,8 @@ def index():
 def entry():
     global logger, path_to_book, s3_bucket_name, s3_client, book_name
     logger.info('Creating new form inside of the /entry route')
+    easy_btns = get_easy_button_values()
+    print(f"easy buttons are: {easy_btns}")
     form = TransactionForm.new()
     if form.validate_on_submit():
         # Add the transaction to the GnuCash book
@@ -206,7 +209,7 @@ def entry():
         else:
             flash('Failed to add transaction to GnuCash book', 'danger')
         return redirect(url_for('entry'))
-    return render_template('entry.html', form=form)
+    return render_template('entry.html', form=form, easy_btns=easy_btns)
 
 
 @app.route('/delete', methods=['GET', 'POST'])
