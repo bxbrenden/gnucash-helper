@@ -52,7 +52,7 @@ def validate_easy_button_schema(btns):
     schema = Schema({Required(All(str, Length(min=1))): {Required('source'): All(str, Length(min=1)),
                      Required('dest'): All(str, Length(min=1)),
                      Required('descrip'): All(str, Length(min=1)),
-                     Required('emoji'): All(str, Length(min=1, max=1))}})
+                     Required('emoji'): All(str, Length(min=1, max=2))}})
 
     # Validate each button definition individually from easy-buttons.yml
     for k, v in btns.items():
@@ -447,4 +447,28 @@ def delete_account_with_inheritance(book, acct_fullname):
         return True
     else:
         logger.error(f'Failed to delete account {acct_fullname}.')
+        return False
+
+
+def write_easy_button_yml(btn_info):
+    """Write the Easy Button info out to $EASY_CONFIG_DIR/easy-buttons.yml."""
+    global logger
+    write_dir = ""
+    easy_conf_dir = env.get('EASY_CONFIG_DIR', None)
+    gnucash_dir = env.get('GNUCASH_DIR', None)
+
+    # Prefer the easy_conf_dir for writing the output yaml
+    if easy_conf_dir:
+        write_dir = easy_conf_dir
+    elif gnucash_dir and not easy_conf_dir:
+        write_dir = gnucash_dir
+    else:
+        write_dir = '/app'
+
+    try:
+        with open(write_dir + '/' + 'easy-buttons.yml', 'w') as yf:
+            yf.write(yaml.dump(btn_info))
+            return True
+    except PermissionError:
+        logger.error(f'Failed to write easy-buttons.yml to {easy_conf_dir}: permission denied.')
         return False

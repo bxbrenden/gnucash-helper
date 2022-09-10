@@ -10,7 +10,9 @@ from gnucash_helper import list_accounts,\
                            delete_transaction,\
                            delete_account_with_inheritance,\
                            add_account,\
-                           get_easy_button_values
+                           get_easy_button_values,\
+                           write_easy_button_yml,\
+                           validate_easy_button_schema
 
 from datetime import datetime
 from decimal import ROUND_HALF_UP
@@ -135,6 +137,60 @@ class AddAccountForm(FlaskForm):
         add_acc_form.parent_account_select.choices = account_names
 
         return add_acc_form
+
+
+class AddEasyButton(FlaskForm):
+    name = StringField('Name',
+                       validators=[DataRequired()])
+    debit = SelectField('From Account (Debit)',
+                        validators=[DataRequired()],
+                        validate_choice=True)
+    credit = SelectField('To Account (Credit)',
+                         validators=[DataRequired()],
+                         validate_choice=True)
+    descrip = TextAreaField('Description',
+                            validators=[DataRequired()])
+    emoji = TextAreaField('Emoji (limit: 1 character)',
+                          validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new TransactionForm."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create AddEasyButton form.')
+        accounts = list_accounts(path_to_book)
+        btn_form = cls()
+        btn_form.debit.choices = accounts
+        btn_form.credit.choices = accounts
+
+        return btn_form
+
+
+class DeleteEasyButton(FlaskForm):
+    delete = SelectField('Select an Easy Button to Delete',
+                         validators=[DataRequired()],
+                         validate_choice=True)
+    submit = SubmitField('Delete')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new DeleteEasyButton form."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create DeleteEasyButton form.')
+        buttons = get_easy_button_values()
+
+        # List of summarized txns to display in dropdown box
+        summaries = []
+        for b in buttons.keys():
+            summaries.append(f'{buttons[b]["emoji"]} {b}')
+
+        del_easy_form = cls()
+        del_easy_form.delete.choices = summaries
+
+        return del_easy_form
 
 
 app = Flask(__name__)
@@ -293,6 +349,69 @@ def balances():
 
     return render_template('balances.html',
                            accounts=accounts)
+
+
+@app.route('/easy-buttons', methods=['GET', 'POST'])
+def easy_buttons():
+    global logger
+    logger.info('Creating new form inside of the /easy-buttons route')
+    existing_easy_btns = get_easy_button_values()
+    if existing_easy_btns:
+        logger.info(f"Current easy buttons are: {existing_easy_btns}")
+    add_form = AddEasyButton.new()
+    del_form = DeleteEasyButton.new()
+    if add_form.validate_on_submit():
+        name = add_form.name.data
+        debit = add_form.debit.data
+        credit = add_form.credit.data
+        descrip = add_form.descrip.data
+        emoji = add_form.emoji.data
+
+        easy_btn_dict = {name: {'source': debit,
+                                'dest': credit,
+                                'descrip': descrip,
+                                'emoji': emoji}}
+
+        is_valid_btn = validate_easy_button_schema(easy_btn_dict)
+        # Initialize the "written" variable as False by default
+        written = False
+        if is_valid_btn:
+            # If there aren't any existing easy buttons, write a new file
+            if not existing_easy_btns:
+                written = write_easy_button_yml(easy_btn_dict)
+            # Otherwise, extend the existing button list and write all that to a file
+            else:
+                new_easy_btns = existing_easy_btns | easy_btn_dict
+                written = write_easy_button_yml(new_easy_btns)
+
+        if written:
+            flash(f'Easy button "{name}" added successfully.',
+                  'success')
+        else:
+            flash(f'Easy button "{name}" was not saved successfully. Did you accidentally add multiple characters? Only one emoji is allowed.',
+                  'danger')
+
+        return redirect(url_for('easy_buttons'))
+    elif del_form.validate_on_submit():
+        # No changes are written at first
+        written = False
+        delete = del_form.delete.data
+        del_key = delete.split()[1]
+        current_btns = get_easy_button_values()
+        if del_key in current_btns.keys():
+            # Delete from the Yaml file and write / save it
+            del(current_btns[del_key])
+            written = write_easy_button_yml(current_btns)
+        else:
+            written = False
+        if written:
+            flash(f'Easy button "{del_key}" deleted successfully.',
+                  'success')
+        else:
+            flash(f'Easy button "{del_key}" was not deleted successfully.',
+                  'danger')
+        return redirect(url_for('easy_buttons'))
+    return render_template('easy-buttons.html', add_form=add_form, del_form=del_form)
 
 
 @app.errorhandler(404)
