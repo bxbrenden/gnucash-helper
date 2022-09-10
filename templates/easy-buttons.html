@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% import "bootstrap/wtf.html" as wtf %}
+{% block head %}
+{{ super() }}
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+{% endblock %}
 
 {% block title %} Easy Button Manager {% endblock %}
 {% block styles %}
@@ -13,4 +17,13 @@
   <h2>Add an Easy Button</h2>
 </div>
 {{ wtf.quick_form(form) }}
+<emoji-picker></emoji-picker>
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js'
+  import insertText from 'https://cdn.jsdelivr.net/npm/insert-text-at-cursor@0.3.0/index.js'
+
+  document.querySelector('emoji-picker').addEventListener('emoji-click', e => {
+    insertText(document.getElementById('emoji'), e.detail.unicode)
+  })
+</script>
 {% endblock %}

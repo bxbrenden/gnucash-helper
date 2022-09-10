@@ -148,10 +148,10 @@ class AddEasyButton(FlaskForm):
     credit = SelectField('To Account (Credit)',
                          validators=[DataRequired()],
                          validate_choice=True)
-    descrip = TextAreaField('Description', validators=[DataRequired('The default description that appears every time you press the Easy Button')])
-    emoji = SelectField('Emoji',
-                        validators=[DataRequired()],
-                        validate_choice=True)
+    descrip = TextAreaField('Description',
+                            validators=[DataRequired()])
+    emoji = TextAreaField('Emoji (limit: 1 character)',
+                          validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     @classmethod
@@ -164,7 +164,6 @@ class AddEasyButton(FlaskForm):
         btn_form = cls()
         btn_form.debit.choices = accounts
         btn_form.credit.choices = accounts
-        btn_form.emoji.choices = ['🎅', '🏇', '👌']
 
         return btn_form
 
@@ -348,6 +347,8 @@ def easy_buttons():
                                 'emoji': emoji}}
 
         is_valid_btn = validate_easy_button_schema(easy_btn_dict)
+        # Initialize the "written" variable as False by default
+        written = False
         if is_valid_btn:
             # If there aren't any existing easy buttons, write a new file
             if not existing_easy_btns:
@@ -361,7 +362,7 @@ def easy_buttons():
             flash(f'Easy button "{name}" added successfully.',
                   'success')
         else:
-            flash(f'Easy button "{name}" was not saved successfully',
+            flash(f'Easy button "{name}" was not saved successfully. Did you accidentally add multiple characters? Only one emoji is allowed.',
                   'danger')
 
         return redirect(url_for('easy_buttons'))
