@@ -10,7 +10,9 @@ from gnucash_helper import list_accounts,\
                            delete_transaction,\
                            delete_account_with_inheritance,\
                            add_account,\
-                           get_easy_button_values
+                           get_easy_button_values,\
+                           write_easy_button_yml,\
+                           validate_easy_button_schema
 
 from datetime import datetime
 from decimal import ROUND_HALF_UP
@@ -135,6 +137,36 @@ class AddAccountForm(FlaskForm):
         add_acc_form.parent_account_select.choices = account_names
 
         return add_acc_form
+
+
+class AddEasyButton(FlaskForm):
+    name = StringField('Name',
+                       validators=[DataRequired()])
+    debit = SelectField('From Account (Debit)',
+                        validators=[DataRequired()],
+                        validate_choice=True)
+    credit = SelectField('To Account (Credit)',
+                         validators=[DataRequired()],
+                         validate_choice=True)
+    descrip = TextAreaField('Description', validators=[DataRequired('The default description that appears every time you press the Easy Button')])
+    emoji = SelectField('Emoji',
+                        validators=[DataRequired()],
+                        validate_choice=True)
+    submit = SubmitField('Submit')
+
+    @classmethod
+    def new(cls):
+        """Instantiate a new TransactionForm."""
+        global path_to_book
+        global logger
+        logger.info('Attempting to read GnuCash book to create TransactionForm.')
+        accounts = list_accounts(path_to_book)
+        btn_form = cls()
+        btn_form.debit.choices = accounts
+        btn_form.credit.choices = accounts
+        btn_form.emoji.choices = ['🎅', '🏇', '👌']
+
+        return btn_form
 
 
 app = Flask(__name__)
@@ -293,6 +325,47 @@ def balances():
 
     return render_template('balances.html',
                            accounts=accounts)
+
+
+@app.route('/easy-buttons', methods=['GET', 'POST'])
+def easy_buttons():
+    global logger
+    logger.info('Creating new form inside of the /easy-buttons route')
+    existing_easy_btns = get_easy_button_values()
+    if existing_easy_btns:
+        logger.info(f"Current easy buttons are: {existing_easy_btns}")
+    form = AddEasyButton.new()
+    if form.validate_on_submit():
+        name = form.name.data
+        debit = form.debit.data
+        credit = form.credit.data
+        descrip = form.descrip.data
+        emoji = form.emoji.data
+
+        easy_btn_dict = {name: {'source': debit,
+                                'dest': credit,
+                                'descrip': descrip,
+                                'emoji': emoji}}
+
+        is_valid_btn = validate_easy_button_schema(easy_btn_dict)
+        if is_valid_btn:
+            # If there aren't any existing easy buttons, write a new file
+            if not existing_easy_btns:
+                written = write_easy_button_yml(easy_btn_dict)
+            # Otherwise, extend the existing button list and write all that to a file
+            else:
+                new_easy_btns = existing_easy_btns | easy_btn_dict
+                written = write_easy_button_yml(new_easy_btns)
+
+        if written:
+            flash(f'Easy button "{name}" added successfully.',
+                  'success')
+        else:
+            flash(f'Easy button "{name}" was not saved successfully',
+                  'danger')
+
+        return redirect(url_for('easy_buttons'))
+    return render_template('easy-buttons.html', form=form)
 
 
 @app.errorhandler(404)

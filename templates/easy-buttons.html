@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} Easy Button Manager {% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='accounts.css')  }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1>Easy Button Manager</h1>
+  <h2>Add an Easy Button</h2>
+</div>
+{{ wtf.quick_form(form) }}
+{% endblock %}
