@@ -14,9 +14,9 @@
 {% block page_content %}
 <div class="page-header">
   <h1>Easy Button Manager</h1>
-  <h2>Add an Easy Button</h2>
 </div>
-{{ wtf.quick_form(form) }}
+<h2>Add an Easy Button</h2>
+{{ wtf.quick_form(add_form) }}
 <emoji-picker></emoji-picker>
 <script type="module">
   import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js'
@@ -26,4 +26,8 @@
     insertText(document.getElementById('emoji'), e.detail.unicode)
   })
 </script>
+<div>
+  <h2>Delete an Easy Button</h2>
+</div>
+{{ wtf.quick_form(del_form) }}
 {% endblock %}

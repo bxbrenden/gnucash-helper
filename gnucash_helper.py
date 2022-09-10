@@ -52,7 +52,7 @@ def validate_easy_button_schema(btns):
     schema = Schema({Required(All(str, Length(min=1))): {Required('source'): All(str, Length(min=1)),
                      Required('dest'): All(str, Length(min=1)),
                      Required('descrip'): All(str, Length(min=1)),
-                     Required('emoji'): All(str, Length(min=1, max=1))}})
+                     Required('emoji'): All(str, Length(min=1, max=2))}})
 
     # Validate each button definition individually from easy-buttons.yml
     for k, v in btns.items():
