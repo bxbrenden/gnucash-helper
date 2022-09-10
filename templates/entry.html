@@ -7,14 +7,6 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='entry.css')  }}">
-<style>
-@media screen and (max-width: 320px) {
-  emoji-picker {
-    --num-columns: 6;
-    --category-emoji-size: 1.125rem;
-  }
-}
-</style>
 {% endblock %}
 {% block page_content %}
 <div class="page-header">
