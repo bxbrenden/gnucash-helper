@@ -185,7 +185,7 @@ class DeleteEasyButton(FlaskForm):
         # List of summarized txns to display in dropdown box
         summaries = []
         for b in buttons.keys():
-            summaries.append(f'{buttons[b]["emoji"]} {b}')
+            summaries.append(f'{b}  ({buttons[b]["emoji"]})')
 
         del_easy_form = cls()
         del_easy_form.delete.choices = summaries
@@ -396,13 +396,14 @@ def easy_buttons():
         # No changes are written at first
         written = False
         delete = del_form.delete.data
-        del_key = delete.split()[1]
+        del_key = delete.split('  (')[0]
         current_btns = get_easy_button_values()
         if del_key in current_btns.keys():
             # Delete from the Yaml file and write / save it
             del(current_btns[del_key])
             written = write_easy_button_yml(current_btns)
         else:
+            logger.error('Tried to find key {del_key} in yaml, but not found.')
             written = False
         if written:
             flash(f'Easy button "{del_key}" deleted successfully.',
