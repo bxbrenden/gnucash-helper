@@ -2,6 +2,7 @@
 *.LNK
 *.log
 *.swp
-__pycache__/
+**/__pycache__/
 *.swp
 Envfile
+**/venv/
