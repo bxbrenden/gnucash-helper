@@ -13,11 +13,9 @@ RUN mkdir /app
 WORKDIR /app
 ADD requirements.txt requirements.txt
 RUN /usr/bin/pip3 install -r requirements.txt
-COPY templates/ templates/
-COPY static/ static/
-ADD gnucash_helper.py gnucash_helper.py
-ADD app.py app.py
+COPY app/ app/
+ADD gch.py gch.py
 
 EXPOSE 8000
 
-CMD ["/usr/local/bin/gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/dev/shm", "app:app"]
+CMD ["/usr/local/bin/gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/dev/shm", "gch:app"]
