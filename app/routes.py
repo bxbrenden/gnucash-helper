@@ -255,13 +255,13 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             err = f"Invalid username or password for username {form.username.data}"
-            flash(err)
+            flash(err, 'danger')
             logger.error(err)
             return redirect(url_for("login"))
         else:
             success = f'Successful login for user {form.username.data}'
             logger.info(success)
-            flash(success)
+            flash(success, 'success')
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
             if not next_page or url_parse(next_page).netloc != '':
@@ -287,7 +287,8 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash(f'Registration was successful! Welcome aboard, {form.username.data}!')
+        flash(f'Registration was successful! Welcome aboard, {form.username.data}!',
+              'success')
     return render_template('register.html', form=form)
 
 
