@@ -53,3 +53,4 @@ wcwidth==0.2.5
 Werkzeug==2.2.2
 WTForms==3.0.1
 zipp==3.8.1
+flask-shell-ipython==0.4.1

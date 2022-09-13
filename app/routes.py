@@ -248,10 +248,10 @@ def easy_buttons():
 def login():
     global logger
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('entry'))
     form = LoginForm()
     if form.validate_on_submit():
-        logger.info('Login info was not malformed for login attempt.')
+        logger.info('Login info was well-formed for login attempt.')
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             err = f"Invalid username or password for username {form.username.data}"
