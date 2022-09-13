@@ -5,8 +5,10 @@
 {% block page_content %}
 <h1>Log In</h1>
 {{ wtf.quick_form(form) }}
+{% if not hide_registration_link %}
 <div>
   <h2>Register</h2>
-  <p>If don't have a login yet, please <a href="{{ url_for('register') }}">register</a></p>
+  <p>If you don't have a login yet, please <a href="{{ url_for('register') }}">register</a></p>
 </div>
+{% endif %}
 {% endblock %}

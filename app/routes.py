@@ -267,7 +267,12 @@ def login():
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('entry')
             return redirect(next_page)
-    return render_template("login.html", form=form)
+    user_list = User.query.all()
+    if len(user_list) > 0:
+        hide_registration_link = True
+    else:
+        hide_registration_link = False
+    return render_template("login.html", form=form, hide_registration_link=hide_registration_link)
 
 
 @app.route("/logout")
@@ -281,6 +286,11 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+    users_list = User.query.all()
+    if len(users_list) > 0:
+        flash('Only one user account is allowed to register. Log in with existing credentials.',
+              'danger')
+        return redirect(url_for('login'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
