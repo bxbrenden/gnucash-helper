@@ -98,11 +98,11 @@ def get_book_name_from_env():
     """Get the GnuCash book name from an environment variable."""
     try:
         book_name = env['GNUCASH_FILE']
-    except KeyError as ke:
-        logger.critical(f'Could not get GnuCash book name from env. var. {ke}.')
-        sys.exit(1)
-    else:
-        return book_name
+    except KeyError:
+        logger.error('Failed to get GNUCASH_FILE env. var. Defaulting to "budget.gnucash".')
+        book_name = 'budget.gnucash'
+
+    return book_name
 
 
 def open_book(book_name, readonly=False, open_if_lock=True, do_backup=False):
@@ -324,12 +324,12 @@ def get_gnucash_dir():
     """Get the fully qualified path of the directory of your .gnucash file."""
     try:
         gnucash_dir = env['GNUCASH_DIR']
-    except KeyError as ke:
-        logger.critical(f'Error, could not get GnuCash directory {ke} from env var')
-        logger.critical('Make sure to set $GNUCASH_DIR')
-        sys.exit(1)
-    else:
-        return gnucash_dir
+    except KeyError:
+        msg = 'Could not get GnuCash directory from GNUCASH_DIR env var.\n'
+        msg += 'Defaulting gnucash_dir to "/app"'
+        gnucash_dir = '/app'
+
+    return gnucash_dir
 
 
 def summarize_transaction(txn):
