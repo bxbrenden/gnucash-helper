@@ -2,16 +2,17 @@ from app.gnucash_helper import list_accounts, get_book_name_from_env, \
     open_book, get_gnucash_dir, last_n_transactions, summarize_transaction, \
     get_easy_button_values, logger
 
+from app.models import User
+
 from decimal import ROUND_HALF_UP
 import os
 
 from flask_wtf import FlaskForm
 from wtforms import DecimalField, SelectField, SubmitField, TextAreaField, \
-    StringField
+    StringField, BooleanField
 
-from wtforms.fields import DateField
-from wtforms.validators import DataRequired
-
+from wtforms.fields import DateField, PasswordField
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
@@ -170,3 +171,28 @@ class DeleteEasyButton(FlaskForm):
         del_easy_form.delete.choices = summaries
 
         return del_easy_form
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
+    submit = SubmitField('Log In')
+
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Register')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Username is already taken. Please use a different username.')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Account already exists for this email address. Please choose another one.')

@@ -1,26 +1,19 @@
-from app.gnucash_helper import get_book_name_from_env,\
-                               logger,\
-                               open_book,\
-                               add_transaction,\
-                               get_gnucash_dir,\
-                               last_n_transactions,\
-                               get_env_var,\
-                               delete_transaction,\
-                               delete_account_with_inheritance,\
-                               add_account,\
-                               get_easy_button_values,\
-                               write_easy_button_yml,\
-                               validate_easy_button_schema
-
-from app.forms import AddAccountForm, AddEasyButton, DeleteTransactionForm, \
-    DeleteAccountForm, DeleteEasyButton, TransactionForm
-
 from datetime import datetime
 import os
 
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, login_user, logout_user, current_user
+from werkzeug.urls import url_parse
 
-from app import app
+from app import app, db
+from app.forms import AddAccountForm, AddEasyButton, DeleteTransactionForm,\
+    DeleteAccountForm, DeleteEasyButton, TransactionForm, RegistrationForm,\
+    LoginForm
+from app.gnucash_helper import get_book_name_from_env, logger, open_book,\
+    add_transaction, get_gnucash_dir, last_n_transactions, get_env_var,\
+    delete_transaction, delete_account_with_inheritance, add_account,\
+    get_easy_button_values, write_easy_button_yml, validate_easy_button_schema
+from app.models import User
 
 
 book_name = get_book_name_from_env()
@@ -38,6 +31,7 @@ def index():
 
 
 @app.route('/entry', methods=['GET', 'POST'])
+@login_required
 def entry():
     global logger
     logger.info('Creating new form inside of the /entry route')
@@ -71,6 +65,7 @@ def entry():
 
 
 @app.route('/delete', methods=['GET', 'POST'])
+@login_required
 def delete():
     global logger
     logger.info('Creating new form inside of the /delete route')
@@ -97,6 +92,7 @@ def delete():
 
 
 @app.route('/accounts', methods=['GET', 'POST'])
+@login_required
 def accounts():
     global logger
     logger.info('Creating new form inside of the /accounts route')
@@ -140,6 +136,7 @@ def accounts():
 
 
 @app.route('/transactions')
+@login_required
 def transactions():
     global path_to_book
     global logger
@@ -160,6 +157,7 @@ def transactions():
 
 
 @app.route('/balances')
+@login_required
 def balances():
     global path_to_book
     global logger
@@ -182,6 +180,7 @@ def balances():
 
 
 @app.route('/easy-buttons', methods=['GET', 'POST'])
+@login_required
 def easy_buttons():
     global logger
     logger.info('Creating new form inside of the /easy-buttons route')
@@ -230,7 +229,7 @@ def easy_buttons():
         current_btns = get_easy_button_values()
         if del_key in current_btns.keys():
             # Delete from the Yaml file and write / save it
-            del(current_btns[del_key])
+            del current_btns[del_key]
             written = write_easy_button_yml(current_btns)
         else:
             logger.error('Tried to find key {del_key} in yaml, but not found.')
@@ -243,6 +242,64 @@ def easy_buttons():
                   'danger')
         return redirect(url_for('easy_buttons'))
     return render_template('easy-buttons.html', add_form=add_form, del_form=del_form)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    global logger
+    if current_user.is_authenticated:
+        return redirect(url_for('entry'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        logger.info('Login info was well-formed for login attempt.')
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            err = f"Invalid username or password for username {form.username.data}"
+            flash(err, 'danger')
+            logger.error(err)
+            return redirect(url_for("login"))
+        else:
+            success = f'Successful login for user {form.username.data}'
+            logger.info(success)
+            flash(success, 'success')
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('entry')
+            return redirect(next_page)
+    user_list = User.query.all()
+    if len(user_list) > 0:
+        hide_registration_link = True
+    else:
+        hide_registration_link = False
+    return render_template("login.html", form=form, hide_registration_link=hide_registration_link)
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+
+    return redirect(url_for('index'))
+
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    users_list = User.query.all()
+    if len(users_list) > 0:
+        flash('Only one user account is allowed to register. Log in with existing credentials.',
+              'danger')
+        return redirect(url_for('login'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Registration was successful! Welcome aboard, {form.username.data}!',
+              'success')
+    return render_template('register.html', form=form)
 
 
 @app.errorhandler(404)
