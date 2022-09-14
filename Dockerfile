@@ -15,6 +15,12 @@ ADD requirements.txt requirements.txt
 RUN /usr/bin/pip3 install -r requirements.txt
 COPY app/ app/
 ADD gch.py gch.py
+ADD flask_db_init.sh flask_db_init.sh
+ADD config.py config.py
+
+# Configure the local sqlite3 DB to hold users.
+# This file deletes itself after configuring the DB.
+RUN ./flask_db_init.sh
 
 EXPOSE 8000
 
