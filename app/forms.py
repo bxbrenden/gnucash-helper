@@ -20,10 +20,10 @@ path_to_book = gnucash_dir + '/' + book_name
 
 
 class TransactionForm(FlaskForm):
-    debit = SelectField('From Account (Debit)',
+    debit = SelectField('From Account',
                         validators=[DataRequired()],
                         validate_choice=True)
-    credit = SelectField('To Account (Credit)',
+    credit = SelectField('To Account',
                          validators=[DataRequired()],
                          validate_choice=True)
     amount = DecimalField('Amount ($)',
@@ -122,10 +122,10 @@ class AddAccountForm(FlaskForm):
 class AddEasyButton(FlaskForm):
     name = StringField('Name',
                        validators=[DataRequired()])
-    debit = SelectField('From Account (Debit)',
+    debit = SelectField('From Account',
                         validators=[DataRequired()],
                         validate_choice=True)
-    credit = SelectField('To Account (Credit)',
+    credit = SelectField('To Account',
                          validators=[DataRequired()],
                          validate_choice=True)
     descrip = TextAreaField('Description',
