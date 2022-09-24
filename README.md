@@ -10,7 +10,7 @@ It uses `.gnucash` files behind the scenes, so you can easily export your data a
 ## Running
 The easiest way to run GnuCash-Helper is via Docker.
 
-If you're familiar with Ansible, see the `Ansible` section below to automate the deployment of GnuCash-Helper with Docker.
+If you're familiar with Ansible, see the `Ansible` section below (coming soon!) to automate the deployment of GnuCash-Helper with Docker.
 
 You can fetch the latest Docker image from Docker Hub with this command:
 ```
