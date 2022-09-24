@@ -16,7 +16,7 @@ fi
 touch $GCH_LOG_DIR/gnucash-helper.log
 export GNUCASH_DIR=$GCH_DEV
 export GNUCASH_FILE=demo-budget.gnucash
-export NUM_TRANSACTIONS=200
+export NUM_TRANSACTIONS=10000
 echo -e "Running gnucash-helper via pipenv run gunicorn...\n"
 pipenv run gunicorn -b 0.0.0.0:8000 --worker-tmp-dir /dev/shm gch:app
 

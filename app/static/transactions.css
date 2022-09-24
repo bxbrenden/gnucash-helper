@@ -8,3 +8,13 @@ h1, h2, h3 {
   text-align: center;
   margin-top: 10px;
 }
+
+a.acct-link {
+  text-decoration: none;
+  color: #dcdcdc;
+}
+
+a.acct-link:hover {
+  text-decoration: underline;
+  color: #f57d4a;
+}

@@ -18,3 +18,13 @@ td.gcbal {
 body, html {
   background-repeat: no-repeat;
 }
+
+a.acct-link {
+  text-decoration: none;
+  color: #dcdcdc;
+}
+
+a.acct-link:hover {
+  color: #f57d4a;
+  text-decoration: underline;
+}
