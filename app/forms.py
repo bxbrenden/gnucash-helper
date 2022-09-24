@@ -196,3 +196,7 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Account already exists for this email address. Please choose another one.')
+
+
+class ExportForm(FlaskForm):
+    submit = SubmitField('Download')
