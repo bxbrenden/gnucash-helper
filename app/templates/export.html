@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} Export GnuCash File{% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='export.css')  }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1>Export GnuCash File</h1>
+</div>
+<p>Download a copy of the GnuCash file containing all of your transactions</p>
+{{ wtf.quick_form(form) }}
+{% endblock %}

@@ -2,14 +2,14 @@ from datetime import datetime
 import os
 import urllib.parse
 
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, send_from_directory
 from flask_login import login_required, login_user, logout_user, current_user
 from werkzeug.urls import url_parse
 
 from app import app, db
 from app.forms import AddAccountForm, AddEasyButton, DeleteTransactionForm,\
     DeleteAccountForm, DeleteEasyButton, TransactionForm, RegistrationForm,\
-    LoginForm
+    LoginForm, ExportForm
 from app.gnucash_helper import get_book_name_from_env, logger, open_book,\
     add_transaction, get_gnucash_dir, last_n_transactions, get_env_var,\
     delete_transaction, delete_account_with_inheritance, add_account,\
@@ -328,6 +328,17 @@ def register():
         flash(f'Registration was successful! Welcome aboard, {form.username.data}!',
               'success')
     return render_template('register.html', form=form)
+
+
+@app.route("/export", methods=['GET', 'POST'])
+@login_required
+def export():
+    global gnucash_dir
+    global book_name
+    form = ExportForm()
+    if form.validate_on_submit():
+        return send_from_directory(gnucash_dir, book_name, as_attachment=True)
+    return render_template('export.html', form=form)
 
 
 @app.errorhandler(404)
