@@ -20,7 +20,7 @@ def configure_logging():
     try:
         log_dir = env['GCH_LOG_DIR']
         fh = logging.FileHandler(f'{log_dir}/gnucash-helper.log', encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
     except KeyError:
