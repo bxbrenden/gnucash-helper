@@ -1,5 +1,6 @@
 # GnuCash-Helper
-![GnuCash-Helper Logo](https://github.com/bxbrenden/gnucash-helper/blob/main/app/static/gnucash-helper-bubble-logo_08-180x180.png)
+![GnuCash-Helper Logo](https://github.com/bxbrenden/gnucash-helper/blob/main/app/static/gnucash-helper-bubble-logo_08-300x300.png)
+
 GnuCash-Helper is a personal finance app based on GnuCash.
 It can be used as a standalone app and does not require GnuCash to work.
 
