@@ -20,7 +20,7 @@ def configure_logging():
     try:
         log_dir = env['GCH_LOG_DIR']
         fh = logging.FileHandler(f'{log_dir}/gnucash-helper.log', encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
     except KeyError:
@@ -238,7 +238,7 @@ def last_n_transactions(book, n=50):
         for split in splits:
             logger.debug(split)
         if len(splits) != 2:
-            logger.error(f'The length of splits was not 2 for transaction #{ind}. Skipping.')
+            logger.debug(f'The length of splits was not 2 for transaction #{ind}. Skipping.')
             continue
 
         # figure out which split contains the debit acct in the transaction
@@ -362,11 +362,11 @@ def delete_transaction(book, txn):
     transactions = book.transactions
     for t in transactions:
         if t.guid == guid:
-            logger.info(f'Attempting to delete transaction {t} from book.')
+            logger.debug(f'Attempting to delete transaction {t} from book.')
             book.delete(t)
-            logger.info('Flushing book to ensure deletion takes hold.')
+            logger.debug('Flushing book to ensure deletion takes hold.')
             book.flush()
-            logger.info('Saving GnuCash book after deletion + flush.')
+            logger.debug('Saving GnuCash book after deletion + flush.')
             book.save()
             return True
 
