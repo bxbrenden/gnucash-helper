@@ -26,8 +26,12 @@
       {% else %}
       <tr class="oddrow">
       {% endif %}
-	<td>{{ trans['source'] }}</td>
-	<td>{{ trans['dest'] }}</td>
+      <td>
+        <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['source']) }}">{{ trans['source'] }}</a>
+      </td>
+      <td>
+        <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['dest']) }}">{{ trans['dest'] }}</a>
+      </td>
 	<td>{{ trans['date'] }}</td>
 	<td>{{ trans['description'] }}</td>
 	<td>{{ trans['amount'] }}</td>
