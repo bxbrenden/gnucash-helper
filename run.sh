@@ -10,9 +10,6 @@ echo -e "Running pipenv install with no args...\n"
 pipenv install
 mkdir -p $GCH_DEV
 mkdir -p $GCH_LOG_DIR
-if [ ! -f $GCH_DEV/demo-budget.gnucash ]; then
-    cp ~/git/gnucash-helper/demo-budget.gnucash $GCH_DEV
-fi
 touch $GCH_LOG_DIR/gnucash-helper.log
 export GNUCASH_DIR=$GCH_DEV
 export GNUCASH_FILE=demo-budget.gnucash
