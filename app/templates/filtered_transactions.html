@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ account_name }}{% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='transactions.css')  }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1>Filtered Transaction History</h1>
+  <h3>{{ account_name }}</h3>
+</div>
+<div>
+  <table class="table">
+    <thead>
+      <th>Source Account</th>
+      <th>Destination Account</th>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Amount</th>
+    </thead>
+    <tbody>
+      {% for trans in transactions %}
+      {% if loop.index0 % 2 == 0 %}
+      <tr class="evenrow">
+      {% else %}
+      <tr class="oddrow">
+      {% endif %}
+	<td>{{ trans['source'] }}</td>
+	<td>{{ trans['dest'] }}</td>
+	<td>{{ trans['date'] }}</td>
+	<td>{{ trans['description'] }}</td>
+	<td>{{ trans['amount'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
