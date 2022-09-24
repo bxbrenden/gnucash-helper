@@ -88,7 +88,7 @@ def delete():
             message += txn_to_delete
             flash(message, 'danger')
 
-        return redirect(url_for('entry'))
+        return redirect(url_for('delete'))
     return render_template('delete_txn.html', form=form)
 
 
