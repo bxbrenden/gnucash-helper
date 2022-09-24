@@ -22,7 +22,9 @@
       {% else %}
       <tr class="oddrow">
       {% endif %}
-        <td class="gcname">{{ acct['fullname'] }}</td>
+      <td class="gcname">
+        <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=acct['fullname']) }}">{{ acct['fullname']|replace(':', ' ➔ ') }}</a>
+      </td>
 	<td class="gcbal">{{ acct['balance'] }}</td>
       </tr>
       {% endfor %}

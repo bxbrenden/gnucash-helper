@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import urllib.parse
 
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
@@ -156,6 +157,34 @@ def transactions():
                            n=num_transactions)
 
 
+@app.route('/transactions/<account_name>')
+@login_required
+def filtered_transactions(account_name):
+    global path_to_book
+    global logger
+    logger.info('Attempting to open book inside transactions route')
+    book = open_book(path_to_book)
+
+    # determine the number of transactions to display based on env var
+    num_transactions = int(get_env_var('NUM_TRANSACTIONS'))
+    if num_transactions is None:
+        transactions = last_n_transactions(book)
+    else:
+        transactions = last_n_transactions(book, n=num_transactions)
+    book.close()
+
+    # account_name is URL-encoded, need to decode it
+    account_name = urllib.parse.unquote(account_name)
+    filtered = []
+    for t in transactions:
+        if t['source'] == account_name or t['dest'] == account_name:
+            filtered.append(t)
+
+    return render_template('filtered_transactions.html',
+                           transactions=filtered,
+                           account_name=account_name)
+
+
 @app.route('/balances')
 @login_required
 def balances():
@@ -166,10 +195,9 @@ def balances():
     accounts = []
     for acc in book.accounts:
         account = {}
-        fn = acc.fullname.replace(':', ' ➔ ')
         bal = acc.get_balance()
         bal = f'${bal:,.2f}'
-        account['fullname'] = fn
+        account['fullname'] = acc.fullname
         account['balance'] = bal
         accounts.append(account)
     accounts = sorted(accounts, key=lambda x: x['fullname'])
