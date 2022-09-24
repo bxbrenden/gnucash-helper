@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Transaction History{% endblock %}
+{% block title %}{{ account_name }}{% endblock %}
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='transactions.css')  }}">
 {% endblock %}
 {% block page_content %}
 <div class="page-header">
-  <h1>Transaction History</h1>
-  <h3>Last {{ n }} transactions</h3>
+  <h1>Filtered Transaction History</h1>
+  <h3>{{ account_name }}</h3>
 </div>
 <div>
   <table class="table">
@@ -26,12 +26,12 @@
       {% else %}
       <tr class="oddrow">
       {% endif %}
-      <td>
-        <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['source']) }}">{{ trans['source'] }}</a>
-      </td>
-      <td>
-        <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['dest']) }}">{{ trans['dest'] }}</a>
-      </td>
+	<td>
+    <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['source']) }}">{{ trans['source'] }}</a>
+  </td>
+	<td>
+    <a class="acct-link" href="{{ url_for('filtered_transactions', account_name=trans['dest']) }}">{{ trans['dest'] }}</a>
+  </td>
 	<td>{{ trans['date'] }}</td>
 	<td>{{ trans['description'] }}</td>
 	<td>{{ trans['amount'] }}</td>
