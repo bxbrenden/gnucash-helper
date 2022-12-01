@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
 
+GCH_VERSION = "0.7.9"
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
