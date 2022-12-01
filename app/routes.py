@@ -6,7 +6,7 @@ from flask import render_template, redirect, url_for, flash, request, send_from_
 from flask_login import login_required, login_user, logout_user, current_user
 from werkzeug.urls import url_parse
 
-from app import app, db
+from app import app, db, GCH_VERSION
 from app.forms import AddAccountForm, AddEasyButton, DeleteTransactionForm,\
     DeleteAccountForm, DeleteEasyButton, TransactionForm, RegistrationForm,\
     LoginForm, ExportForm
@@ -26,9 +26,10 @@ book_exists = os.path.exists(path_to_book)
 @app.route('/')
 def index():
     global logger
+    global GCH_VERSION
     logger.debug('Rendering the index page')
 
-    return render_template('index.html')
+    return render_template('index.html', gch_version=GCH_VERSION)
 
 
 @app.route('/entry', methods=['GET', 'POST'])
@@ -154,7 +155,7 @@ def transactions():
 
     return render_template('transactions.html',
                            transactions=transactions,
-                           n=num_transactions)
+                           n=len(transactions))
 
 
 @app.route('/transactions/<account_name>')

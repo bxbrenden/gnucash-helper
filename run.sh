@@ -3,7 +3,7 @@ export FLASK_APP=gch.py
 export GCH_DEV='/home/brenden/gch-dev'
 export GCH_LOG_DIR='/home/brenden/gch-dev/logs'
 export EASY_CONFIG_DIR=$GCH_DEV
-pyenv global 3.9.12
+pyenv global 3.9.14
 cd ~/git/gnucash-helper
 python3 -m pip install --upgrade pipenv
 echo -e "Running pipenv install with no args...\n"
