@@ -161,11 +161,12 @@ class DeleteEasyButton(FlaskForm):
         global logger
         logger.info('Attempting to read GnuCash book to create DeleteEasyButton form.')
         buttons = get_easy_button_values()
+        summaries = []
 
         # List of summarized txns to display in dropdown box
-        summaries = []
-        for b in buttons.keys():
-            summaries.append(f'{b}  ({buttons[b]["emoji"]})')
+        if buttons is not None:
+            for b in buttons.keys():
+                summaries.append(f'{b}  ({buttons[b]["emoji"]})')
 
         del_easy_form = cls()
         del_easy_form.delete.choices = summaries

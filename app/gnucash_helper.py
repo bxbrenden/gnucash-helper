@@ -76,6 +76,8 @@ def get_easy_button_values():
 
             if validate_easy_button_schema(btns):
                 return btns
+            else:
+                logger.error("Schema validation failed for easy-buttons.yml")
 
     except FileNotFoundError:
         err = 'Failed to find easy button config. file. '
