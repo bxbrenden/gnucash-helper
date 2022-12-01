@@ -130,7 +130,7 @@ class AddEasyButton(FlaskForm):
                          validate_choice=True)
     descrip = TextAreaField('Description',
                             validators=[DataRequired()])
-    emoji = TextAreaField('Emoji (limit: 1 character)',
+    emoji = TextAreaField('Emoji (pick as many as you want)',
                           validators=[DataRequired()])
     submit = SubmitField('Submit')
 
