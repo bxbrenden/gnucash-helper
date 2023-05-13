@@ -1,16 +1,6 @@
-food:
-  source: Assets:Current Assets:Cash in Wallet
-  dest: Expenses:Dining
-  descrip: Quick food purchase 🍕
-fun:
-  source: Assets:Current Assets:Checking Account
+---
+EntertainmentCapitalOne:
+  descrip: "Entertainment \U0001F3A1"
   dest: Expenses:Entertainment
-  descrip: Quick entertainment purchase 🎡
-cats:
-  source: Assets:Current Assets:Checking Account:Cat Food
-  dest: Expenses:Cats
-  descrip: Cat food for little jerk cats 😾
-misc:
-  source: Assets:Current Assets:Checking Account:Incidentals
-  dest: Expenses:Incidentals
-  descrip: Quick incidental spending 🤷
+  emoji: "\U0001F3A1"
+  source: Liabilities:Credit Cards:SecondCapitalBank
