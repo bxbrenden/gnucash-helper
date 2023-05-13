@@ -21,7 +21,15 @@ Below is an example `docker run` command for running the container.
 It assumes that your docker host has a file called `demo-budget.gnucash` in a directory called `/gnucash`.
 This file is mounted into the container.
 ```bash
-docker run -d --restart unless-stopped -p 8000:8000 -v /gnucash:/gnucash -e GNUCASH_FILE=demo-budget.gnucash -e GNUCASH_DIR=/gnucash -e NUM_TRANSACTIONS=10000 -e EASY_CONFIG_DIR=/gnucash bxbrenden/gnucash-helper:latest
+docker run -d \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  -v /gnucash:/gnucash \
+  -e GNUCASH_FILE=demo-budget.gnucash \
+  -e GNUCASH_DIR=/gnucash \
+  -e NUM_TRANSACTIONS=10000 \
+  -e EASY_CONFIG_DIR=/gnucash \
+  bxbrenden/gnucash-helper:latest
 ```
 
 If you're curious about the environment variables that GnuCash-Helper requires, see the `Configuration` section.
