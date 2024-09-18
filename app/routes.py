@@ -24,6 +24,7 @@ book_exists = os.path.exists(path_to_book)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
     global logger
     logger.debug('Accessing the upload() method')
