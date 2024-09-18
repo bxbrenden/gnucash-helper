@@ -1,4 +1,4 @@
-FROM debian:bookworm-20230502-slim
+FROM debian:bookworm-20240904-slim
 
 LABEL "maintainer"="brendenahyde@gmail.com"
 
