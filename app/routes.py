@@ -9,7 +9,7 @@ from werkzeug.urls import url_parse
 from app import app, db, GCH_VERSION
 from app.forms import AddAccountForm, AddEasyButton, DeleteTransactionForm,\
     DeleteAccountForm, DeleteEasyButton, TransactionForm, RegistrationForm,\
-    LoginForm, ExportForm
+    LoginForm, ExportForm, UploadForm
 from app.gnucash_helper import get_book_name_from_env, logger, open_book,\
     add_transaction, get_gnucash_dir, last_n_transactions, get_env_var,\
     delete_transaction, delete_account_with_inheritance, add_account,\
@@ -21,6 +21,22 @@ book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
 path_to_book = gnucash_dir + '/' + book_name
 book_exists = os.path.exists(path_to_book)
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    global logger
+    logger.debug('Accessing the upload() method')
+    if request.method == 'POST':
+        uploaded_file = request.files['file']
+        if uploaded_file.filename != '':
+            # uploaded_file.save(uploaded_file.filename)
+            if uploaded_file.filename.endswith('.gnucash'):
+                uploaded_file.save(path_to_book)
+            else:
+                logger.error(f'Uploaded file {uploaded_file.filename} was not named like a gnucash file. Rejecting.')
+    form = UploadForm()
+    return render_template('upload.html', form=form)
 
 
 @app.route('/')

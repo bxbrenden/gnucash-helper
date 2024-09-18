@@ -27,6 +27,7 @@
         <li><a href="{{ url_for('accounts') }}">Accounts</a></li>
         <li><a href="{{ url_for('easy_buttons') }}">Easy Buttons</a></li>
         <li><a href="{{ url_for('export') }}">Export</a></li>
+        <li><a href="{{ url_for('upload') }}">Upload</a></li>
         {% if current_user.is_authenticated %}
         <li><a href="/logout">Log Out</a></li>
         {% else %}

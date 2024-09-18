@@ -8,6 +8,7 @@ from decimal import ROUND_HALF_UP
 import os
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import DecimalField, SelectField, SubmitField, TextAreaField, \
     StringField, BooleanField
 
@@ -17,6 +18,11 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 book_name = get_book_name_from_env()
 gnucash_dir = get_gnucash_dir()
 path_to_book = gnucash_dir + '/' + book_name
+
+
+class UploadForm(FlaskForm):
+    file = FileField('File')
+    submit = SubmitField('Submit')
 
 
 class TransactionForm(FlaskForm):
