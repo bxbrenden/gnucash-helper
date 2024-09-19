@@ -34,8 +34,10 @@ def upload():
             # uploaded_file.save(uploaded_file.filename)
             if uploaded_file.filename.endswith('.gnucash'):
                 uploaded_file.save(path_to_book)
+                flash(f'Successfully saved GnuCash budget "{uploaded_file.filename}"', 'success')
             else:
                 logger.error(f'Uploaded file {uploaded_file.filename} was not named like a gnucash file. Rejecting.')
+                flash(f'Failed to save GnuCash file "{uploaded_file.filename}" because it did not end with ".gnucash" extension', 'danger')
     form = UploadForm()
     return render_template('upload.html', form=form)
 
